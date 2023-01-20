@@ -14,45 +14,28 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 }
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+.header-text {
+  font-size: 40px;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
+.submit-btn {
+  width: 15rem;
+  align-self: center;
   border-radius: 8px;
   border: 1px solid transparent;
-  padding: 0.6em 1.2em;
+  padding: .8em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #040e1c;
   cursor: pointer;
   transition: border-color 0.25s;
 }
-button:hover {
+.submit-btn:hover {
   border-color: #646cff;
 }
-button:focus,
-button:focus-visible {
+.submit-btn:focus,
+.submit-btn:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
@@ -64,7 +47,64 @@ button:focus-visible {
   a:hover {
     color: #747bff;
   }
-  button {
+  .submit-btn {
     background-color: #f9f9f9;
   }
+}
+
+.sign-up-button {
+  font-weight: 'bold'; 
+  margin-left: 10;
+  border: 0px;
+  font-size: 1em;
+  background-color: transparent;
+  cursor: pointer;
+  color: #e14a4a;
+}
+
+.sign-up-button:hover {
+  color: #e71919;
+  /* text-decoration: underline; */
+}
+
+label {
+  color: #000000;
+  font-weight: bold;
+}
+
+.form-container {  
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  justify-content: center;
+  align-items: ce;
+  background-color: #d9d2d2;
+  background-blend-mode: multiply, multiply;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0px 0px 12px 10px rgba(0,0,0,0.3);
+  width: 300px;
+  margin: 0 auto;
+  text-align: center;
+}
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form-control {
+  width: 70%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  background-color: white;
+  border: 1.5px solid rgb(0, 0, 0);
+  border-radius: 8px;
+  color: #000000;
+}
+
+.form-control:focus {
+  border: 2px solid #555;
 }
