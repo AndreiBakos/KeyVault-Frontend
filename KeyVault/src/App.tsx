@@ -11,7 +11,7 @@ function App() {
     switch(account){
       case Page.LogIn: return (<LogIn setScreen={setScreen} />)
       case Page.SignUp: return (<SignUp setScreen={setScreen} />)
-      default: return (<SignUp setScreen={setScreen} />)
+      default: return (<LogIn setScreen={setScreen} />)
     }
   }
 
