@@ -52,7 +52,7 @@ export default function LogIn( { setScreen }: any ) {
                     <p>Don't have an account?</p>
                     <button className='sign-up-button' onClick={() => setScreen(Page.SignUp)}>Sign Up</button>
                 </div>
-                <button className='submit-btn' onClick={handleSubmit}>Login</button>
+                <button className='submit-btn' type='submit' onClick={handleSubmit}>Login</button>
             </div>
         </div>
   )

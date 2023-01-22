@@ -5,9 +5,9 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+  color: #ffffffde;
+  /* background-color: #526a58; */
+  background-color: #363636;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -59,7 +59,7 @@
   font-size: 1em;
   background-color: transparent;
   cursor: pointer;
-  color: #e14a4a;
+  color: #c23030;
 }
 
 .sign-up-button:hover {
@@ -83,7 +83,6 @@
 }
 
 label {
-  color: #000000;
   font-weight: bold;
 }
 
@@ -93,11 +92,11 @@ label {
   align-self: center;
   justify-content: center;
   align-items: ce;
-  background-color: #d9d2d2;
+  background-color: #ffffff28;
   background-blend-mode: multiply, multiply;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0px 0px 12px 10px rgba(0,0,0,0.3);
+  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.2);
   width: 300px;
   margin: 0 auto;
   text-align: center;

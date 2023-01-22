@@ -1,0 +1,43 @@
+.header-menu {
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+}
+
+li {
+    list-style-type: none;
+    margin-left: -50px;
+    font-weight: bolder;
+    font-size: larger;
+}
+
+.settings-menu:hover {
+    cursor: pointer;
+    opacity: .8;
+}
+.secrets-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.secrets-container-header {
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-weight: bolder;
+  padding: 20px;
+  width: 30rem;
+  background-color: #404040;
+  border: 0px solid;
+  border-radius: 20px;
+}
+
+.secrets-container-header:hover {
+    opacity: .9;
+    border: 1px solid;
+    cursor: pointer;
+    border-color: #646cff;
+}
+.secrets-container-header:focus,
+.secrets-container-header:focus-visible {
+    outline: 41px auto -webkit-focus-ring-color;
+}
