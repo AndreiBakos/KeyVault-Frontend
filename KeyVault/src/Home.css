@@ -15,7 +15,7 @@ li {
     cursor: pointer;
     opacity: .8;
 }
-.secrets-container {
+.secrets-menu-container {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
@@ -40,4 +40,71 @@ li {
 .secrets-container-header:focus,
 .secrets-container-header:focus-visible {
     outline: 41px auto -webkit-focus-ring-color;
+}
+
+.create-secret-conatiner {
+    display: flex;
+    background-color: #5c575735;
+    margin-bottom: 5px;
+    border-radius: 10px;
+    align-items: center;    
+    padding: 15px 24px 15px 25px;
+}
+
+.create-secret-input {
+    border: 0px;
+    outline: none;
+    width: 70%;
+    border-radius: 10px;
+    background-color: #ffffff4e;
+    color: #ebe3e3;
+    font-weight: 800;
+    padding: 10px;
+    height: 10px;
+}
+
+.create-secret-btn {
+    width: 30px;
+    height: 30px;    
+}
+
+.create-secret-btn:hover {
+    cursor: pointer;
+    opacity: .8;
+}
+
+.secrets-content-container {
+    background-color: #5c575735;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: 10px;
+}
+
+.secrets-content {    
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+    border-bottom: .8px solid rgba(0, 0, 0, 0.193);
+    border-radius: 7px;
+}
+
+.group-secrets-content {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    text-align: left;
+    padding: 0px 50px 0px 20px;    
+}
+
+.enter-group-secret:hover {
+    cursor: pointer;
+    opacity: .8;
+}
+
+.secrets-values {
+    width: 100%;
+    padding: 10px;    
+    font-weight: bolder;
 }
