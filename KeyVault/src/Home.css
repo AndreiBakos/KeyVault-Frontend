@@ -27,7 +27,7 @@ li {
   padding: 20px;
   width: 30rem;
   background-color: #404040;
-  border: 0px solid;
+  border: 1px solid #404040;
   border-radius: 20px;
 }
 
@@ -107,4 +107,27 @@ li {
     width: 100%;
     padding: 10px;    
     font-weight: bolder;
+}
+
+.delete-group-btn {
+    width: 15rem;
+    align-self: center;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: .8em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #a50c1e;
+    cursor: pointer;
+    transition: border-color 0.25s;
+}
+
+.delete-group-btn:hover {
+    border-color: #ebe3e381;
+}
+
+.delete-group-btn:focus,
+.delete-group-btn:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
 }

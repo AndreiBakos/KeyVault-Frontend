@@ -23,3 +23,10 @@ export interface GroupSecretsData {
     members: UserForHome[],
     owner: string
 }
+
+export const emptySecret: Secret = {
+    id: 0,
+    title: '',
+    content: '',
+    dateCreated: ''
+}

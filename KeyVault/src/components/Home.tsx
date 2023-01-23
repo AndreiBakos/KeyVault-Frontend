@@ -4,12 +4,9 @@ import { GroupSecretsData, Secret, UserForHome } from '../data/UserSecrets';
 import { secrets } from '../data/MockData/UserSecrets';
 import { groupSecretsData } from '../data/MockData/GroupSecrets';
 import settingsLogo from '../assets/settings-logo.svg';
-import createSign from '../assets/create-sign.svg';
-import closeCreate from '../assets/close-create.svg';
-import enterGroupSecret from '../assets/acces-group-secret.svg';
-import '../Home.css'
 import MySecrets from './MySecrets';
 import GroupSecrets from './GroupSecrets';
+import '../Home.css'
 
 export default function Home ( { setScreen }: any ) {
     const [ isSettingsMenu , setIsSettingsMenu ] = useState<boolean>(false);

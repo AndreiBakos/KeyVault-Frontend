@@ -15,8 +15,8 @@ export default function MySecrets( { userSecrets }: any ) {
 
     return (
         <div>
-            <div style={{ justifyContent: !isNewSecretTriggered ? 'flex-end' : 'space-between' }} className='create-secret-conatiner'>
-                <label hidden={!isNewSecretTriggered} >Create Secret</label>
+            <div style={{ justifyContent: !isNewSecretTriggered ? 'flex-end' : 'space-between', alignItems: 'center' }} className='create-secret-conatiner'>
+                <label hidden={!isNewSecretTriggered} >Enter Secret Title</label>
                 <input hidden={!isNewSecretTriggered}  className='create-secret-input' type='text' value={newSecretDescription} onChange={(e) => setNewSecretDescription(e.target.value)} />
                 <img className='create-secret-btn' src={isNewSecretTriggered ? closeCreate : createSign} onClick={() => setIsNewSecretTriggered(!isNewSecretTriggered)} />
             </div>
