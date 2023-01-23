@@ -16,7 +16,7 @@ export interface UserForHome {
     userName: string
 }
 
-export interface GroupSecrets {
+export interface GroupSecretsData {
     id: number,
     title: string,
     secrets: Secret[],
