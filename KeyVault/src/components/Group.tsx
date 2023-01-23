@@ -1,30 +1,40 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { Page, SecretsPage } from '../data/globalVariables';
 import { GroupSecretsData, Secret, UserForHome } from '../data/UserSecrets';
-import { secrets } from '../data/MockData/UserSecrets';
-import { groupSecretsData } from '../data/MockData/GroupSecrets';
 import createSign from '../assets/create-sign.svg';
 import closeCreate from '../assets/close-create.svg';
 import enterGroupSecret from '../assets/acces-group-secret.svg';
 import backToGroups from '../assets/back-to-groups.svg';
+import deleteBtn from '../assets/delete-icon.svg';
 import '../Home.css'
 
 interface GroupProps {
     currentGroup: GroupSecretsData,
+    setCurrentGroup: Dispatch<SetStateAction<GroupSecretsData>>, 
     groupsList: GroupSecretsData[],
     setGroupsList: Dispatch<SetStateAction<GroupSecretsData[]>>,
-    secrets: Secret[],    
     isGroupEntered: SetStateAction<boolean>,
     setIsGroupEntered: Dispatch<SetStateAction<boolean>>
 }
 
 
-export default function( { currentGroup, groupsList, setGroupsList, secrets, isGroupEntered, setIsGroupEntered }: GroupProps ) {
+export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsList, isGroupEntered, setIsGroupEntered }: GroupProps ) {
     const removeGroup = () => {
         const newGroupsList = groupsList.filter((group: GroupSecretsData) => group.id !== currentGroup.id);
         setGroupsList(newGroupsList);
         setIsGroupEntered(!isGroupEntered)
     }
+
+    const removeSecret = (secretId: number) => {
+        const newGroup: GroupSecretsData = {
+            id: currentGroup.id,
+            title: currentGroup.title,
+            secrets: currentGroup.secrets.filter((secret: Secret) => secret.id !== secretId),
+            members: currentGroup.members,
+            owner: currentGroup.owner
+        }
+        setCurrentGroup(newGroup);
+    }
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', marginTop: 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -36,11 +46,12 @@ export default function( { currentGroup, groupsList, setGroupsList, secrets, isG
                 </div>
                 <div className='secrets-content-container'>
                     {                    
-                        secrets.map((secret: Secret) => (
+                        currentGroup.secrets.map((secret: Secret) => (
                             <div className='secrets-content' key={secret.id}>
                                 <p className='secrets-values'>{secret.title}</p>
                                 <p className='secrets-values'>{secret.content}</p>
                                 <p className='secrets-values'>{secret.dateCreated}</p>
+                                <img className='delete-secret-btn' src={deleteBtn} onClick={() => removeSecret(secret.id)} />
                             </div>
                             )
                         )

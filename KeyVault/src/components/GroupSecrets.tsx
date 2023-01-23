@@ -15,16 +15,14 @@ export default function GroupSecrets( { groupsList, setGroupsList }: any ) {
     const [ newSecretDescription, setNewSecretDescription ] = useState<string>('');
     const [ isGroupEntered, setIsGroupEntered ] = useState<boolean>(false);
     const [ currentGroup, setCurrentGroup ] = useState<GroupSecretsData>(emptyGroup);
-    const [ currentSecrets, setCurrentSecrets ] = useState<Secret[]>([emptySecret]);
 
-    const handleScreenChange = ( group: GroupSecretsData, groupSecretes: Secret[] ) => {
+    const handleScreenChange = ( group: GroupSecretsData ) => {
         setCurrentGroup(group);
-        setCurrentSecrets(groupSecretes);
         setIsGroupEntered(!isGroupEntered);    
     }
     if(isGroupEntered){
         return(
-            <Group currentGroup={currentGroup} groupsList={groupsList} setGroupsList={setGroupsList} secrets={currentSecrets} isGroupEntered={isGroupEntered} setIsGroupEntered={setIsGroupEntered} />
+            <Group currentGroup={currentGroup} setCurrentGroup={setCurrentGroup} groupsList={groupsList} setGroupsList={setGroupsList} isGroupEntered={isGroupEntered} setIsGroupEntered={setIsGroupEntered} />
         )
     }else{
         return (
@@ -53,7 +51,7 @@ export default function GroupSecrets( { groupsList, setGroupsList }: any ) {
                                         ))
                                     }                    
                                 </div>
-                                <img className='enter-group-secret' style={{ width: 30, height: 30, alignSelf: 'center', paddingRight: 50 }} src={enterGroupSecret} onClick={() => handleScreenChange(group, group.secrets)} />
+                                <img className='enter-group-secret' style={{ width: 30, height: 30, alignSelf: 'center', paddingRight: 50 }} src={enterGroupSecret} onClick={() => handleScreenChange(group)} />
                             </div>
                             )
                         )
