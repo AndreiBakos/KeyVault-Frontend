@@ -7,12 +7,17 @@ import settingsLogo from '../assets/settings-logo.svg';
 import createSign from '../assets/create-sign.svg';
 import closeCreate from '../assets/close-create.svg';
 import enterGroupSecret from '../assets/acces-group-secret.svg';
+import deleteBtn from '../assets/delete-icon.svg';
 import '../Home.css'
 
-export default function MySecrets( { userSecrets }: any ) {
+export default function MySecrets( { userSecrets, setUserSecrets }: any ) {
     const [ isNewSecretTriggered, setIsNewSecretTriggered ] = useState<boolean>(false);
     const [ newSecretDescription, setNewSecretDescription ] = useState<string>('');
 
+    const removeSecret = (secretId: number) => {
+        const newSecretsList = userSecrets.filter((secret: Secret) => secret.id !== secretId);
+        setUserSecrets(newSecretsList) 
+    }
     return (
         <div>
             <div style={{ justifyContent: !isNewSecretTriggered ? 'flex-end' : 'space-between', alignItems: 'center' }} className='create-secret-conatiner'>
@@ -26,6 +31,7 @@ export default function MySecrets( { userSecrets }: any ) {
                             <p className='secrets-values'>{secret.title}</p>
                             <p className='secrets-values'>{secret.content}</p>
                             <p className='secrets-values'>{secret.dateCreated}</p>
+                            <img className='delete-secret-btn' src={deleteBtn} onClick={() => removeSecret(secret.id)} />
                         </div>
                             )
                         )

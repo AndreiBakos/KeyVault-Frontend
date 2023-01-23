@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Page, SecretsPage } from '../data/globalVariables';
-import { emptySecret, GroupSecretsData, Secret, UserForHome } from '../data/UserSecrets';
+import { emptyGroup, emptySecret, GroupSecretsData, Secret, UserForHome } from '../data/UserSecrets';
 import { secrets } from '../data/MockData/UserSecrets';
 import { groupSecretsData } from '../data/MockData/GroupSecrets';
 import createSign from '../assets/create-sign.svg';
@@ -10,24 +10,21 @@ import backToGroups from '../assets/back-to-groups.svg';
 import '../Home.css'
 import Group from './Group';
 
-export default function GroupSecrets( { groupSecrets }: any ) {
+export default function GroupSecrets( { groupsList, setGroupsList }: any ) {
     const [ isNewSecretTriggered, setIsNewSecretTriggered ] = useState<boolean>(false);
     const [ newSecretDescription, setNewSecretDescription ] = useState<string>('');
     const [ isGroupEntered, setIsGroupEntered ] = useState<boolean>(false);
-    const [ currentGroupName, setCurrentGroupName ] = useState<string>('');
+    const [ currentGroup, setCurrentGroup ] = useState<GroupSecretsData>(emptyGroup);
     const [ currentSecrets, setCurrentSecrets ] = useState<Secret[]>([emptySecret]);
 
-    const handleScreenChange = ( groupName: string, groupSecretes: Secret[] ) => {
-        setCurrentGroupName(groupName);
+    const handleScreenChange = ( group: GroupSecretsData, groupSecretes: Secret[] ) => {
+        setCurrentGroup(group);
         setCurrentSecrets(groupSecretes);
-        setIsGroupEntered(!isGroupEntered);
-        console.log(groupName)
-        console.log(groupSecretes)
-        console.log(isGroupEntered)
+        setIsGroupEntered(!isGroupEntered);    
     }
     if(isGroupEntered){
         return(
-            <Group title={currentGroupName} secrets={currentSecrets} isGroupEntered={isGroupEntered} setIsGroupEntered={setIsGroupEntered} />
+            <Group currentGroup={currentGroup} groupsList={groupsList} setGroupsList={setGroupsList} secrets={currentSecrets} isGroupEntered={isGroupEntered} setIsGroupEntered={setIsGroupEntered} />
         )
     }else{
         return (
@@ -39,7 +36,7 @@ export default function GroupSecrets( { groupSecrets }: any ) {
                 </div>
                 <div className='secrets-content-container'>
                     {
-                        groupSecrets.map((group: GroupSecretsData) => (
+                        groupsList.map((group: GroupSecretsData) => (
                             <div className='group-secrets-content'>
                                 <p className='secrets-values'>{group.title}</p>
                                 <p className='secrets-values'>Owner: {group.owner}</p>                            
@@ -56,7 +53,7 @@ export default function GroupSecrets( { groupSecrets }: any ) {
                                         ))
                                     }                    
                                 </div>
-                                <img className='enter-group-secret' style={{ width: 30, height: 30, alignSelf: 'center', paddingRight: 50 }} src={enterGroupSecret} onClick={() => handleScreenChange(group.title, group.secrets)} />
+                                <img className='enter-group-secret' style={{ width: 30, height: 30, alignSelf: 'center', paddingRight: 50 }} src={enterGroupSecret} onClick={() => handleScreenChange(group, group.secrets)} />
                             </div>
                             )
                         )

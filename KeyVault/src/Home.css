@@ -73,6 +73,17 @@ li {
     opacity: .8;
 }
 
+.delete-secret-btn {
+    width: 37px;
+    height: 37px;
+    padding-right: 30px;        
+}
+
+.delete-secret-btn:hover {
+    cursor: pointer;
+    opacity: .8;
+}
+
 .secrets-content-container {
     background-color: #5c575735;
     display: flex;
@@ -88,6 +99,7 @@ li {
     width: 100%;
     border-bottom: .8px solid rgba(0, 0, 0, 0.193);
     border-radius: 7px;
+    align-items: center;
 }
 
 .group-secrets-content {

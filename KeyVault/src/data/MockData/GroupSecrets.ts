@@ -1,7 +1,7 @@
-import { GroupSecrets } from "../UserSecrets";
+import { GroupSecretsData } from "../UserSecrets";
 
 
-export const groupSecretsData: GroupSecrets[] = [
+export const groupSecretsData: GroupSecretsData[] = [
     {
         id: 1,
         title: 'IT Support',

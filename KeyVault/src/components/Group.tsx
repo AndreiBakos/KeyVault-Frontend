@@ -8,21 +8,31 @@ import closeCreate from '../assets/close-create.svg';
 import enterGroupSecret from '../assets/acces-group-secret.svg';
 import backToGroups from '../assets/back-to-groups.svg';
 import '../Home.css'
+
 interface GroupProps {
-    title: string,
-    secrets: Secret[],
+    currentGroup: GroupSecretsData,
+    groupsList: GroupSecretsData[],
+    setGroupsList: Dispatch<SetStateAction<GroupSecretsData[]>>,
+    secrets: Secret[],    
     isGroupEntered: SetStateAction<boolean>,
     setIsGroupEntered: Dispatch<SetStateAction<boolean>>
 }
-export default function( { title, secrets, isGroupEntered, setIsGroupEntered }: GroupProps ) {
+
+
+export default function( { currentGroup, groupsList, setGroupsList, secrets, isGroupEntered, setIsGroupEntered }: GroupProps ) {
+    const removeGroup = () => {
+        const newGroupsList = groupsList.filter((group: GroupSecretsData) => group.id !== currentGroup.id);
+        setGroupsList(newGroupsList);
+        setIsGroupEntered(!isGroupEntered)
+    }
     return (
         <div style={{ display: 'flex', flexDirection: 'column', marginTop: 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <img className='enter-group-secret' style={{ width: 40, height: 40 }} src={backToGroups} onClick={() => setIsGroupEntered(!isGroupEntered)} />
-                        <p style={{ fontWeight: 'bolder', fontSize: 30, marginLeft: 20, paddingTop: 3 }}>{title}</p>
+                        <p style={{ fontWeight: 'bolder', fontSize: 30, marginLeft: 20, paddingTop: 3 }}>{currentGroup.title}</p>
                     </div>
-                    <button className='delete-group-btn' type='submit' onClick={() => {}}>Delete Group</button>
+                    <button className='delete-group-btn' type='submit' onClick={() => removeGroup()}>Delete Group</button>
                 </div>
                 <div className='secrets-content-container'>
                     {                    

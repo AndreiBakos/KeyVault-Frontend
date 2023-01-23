@@ -11,7 +11,7 @@ import '../Home.css'
 export default function Home ( { setScreen }: any ) {
     const [ isSettingsMenu , setIsSettingsMenu ] = useState<boolean>(false);
     const [ userSecrets, setUserSecrets ] = useState<Secret[]>(secrets);
-    const [ groupSecrets, setGroupSecrets ] = useState<GroupSecretsData[]>(groupSecretsData);
+    const [ groupsList, setGroupsList ] = useState<GroupSecretsData[]>(groupSecretsData);
     const [ currentSecretsPage, setCurrentSecretsPage ] = useState<SecretsPage>(SecretsPage.MySecrets);
     const [ newSecret, setNewSecret ] = useState<Secret>();
 
@@ -36,15 +36,36 @@ export default function Home ( { setScreen }: any ) {
                 </div>
             </div>            
             <div className='secrets-menu-container'>
-                <p onClick={async() => await setCurentSecretsPage(SecretsPage.GroupSecrets)} style={{ backgroundColor: currentSecretsPage === SecretsPage.MySecrets ? '#646cff' : '#404040' }} className='secrets-container-header'>My Secrets</p>
-                <p onClick={async() => await setCurentSecretsPage(SecretsPage.MySecrets)} style={{ backgroundColor: currentSecretsPage === SecretsPage.GroupSecrets ? '#646cff' : '#404040' }} className='secrets-container-header'>Group Secrets</p>
+                <p onClick={
+                    async() => 
+                        await setCurentSecretsPage(SecretsPage.GroupSecrets)} 
+                        style={
+                            {
+                                 backgroundColor: 
+                                    currentSecretsPage === SecretsPage.MySecrets 
+                                        ? '#646cff'
+                                        : '#404040'
+                            }
+                        }
+                        className='secrets-container-header'>My Secrets</p>
+                <p onClick={
+                    async() => await setCurentSecretsPage(SecretsPage.MySecrets)}
+                    style={
+                        {
+                            backgroundColor:
+                                currentSecretsPage === SecretsPage.GroupSecrets
+                                    ? '#646cff'
+                                    : '#404040'
+                        }
+                    }
+                    className='secrets-container-header'>Group Secrets</p>
             </div>    
             {
                 currentSecretsPage === SecretsPage.MySecrets
                     ?
-                    <MySecrets userSecrets={userSecrets} />
+                    <MySecrets userSecrets={userSecrets} setUserSecrets={setUserSecrets} />
                     :
-                    <GroupSecrets groupSecrets={groupSecrets} />
+                    <GroupSecrets groupsList={groupsList} setGroupsList={setGroupsList} />
             }
         
         </div>

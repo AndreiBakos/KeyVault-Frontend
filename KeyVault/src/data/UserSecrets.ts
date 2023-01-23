@@ -30,3 +30,11 @@ export const emptySecret: Secret = {
     content: '',
     dateCreated: ''
 }
+
+export const emptyGroup: GroupSecretsData = {
+    id: 0,
+    title: '',
+    secrets: [],
+    members: [],
+    owner: ''
+}
