@@ -50,19 +50,19 @@ export default function GroupSecrets( { groupsList, setGroupsList }: any ) {
                         <input style={{ marginRight: newGroupTitle.length === 0 ? 50 : 0 }} hidden={!isNewSecretTriggered} className='create-secret-input' type='text' value={newGroupTitle} onChange={(e) => setNewGroupTitle(e.target.value)} />
                         <img hidden={newGroupTitle.length === 0} className='create-secret-btn' style={{ marginLeft: 20 }} src={SubmitGroupName} onClick={() => createNewGroup()} />            
                     </div>                       
-                    <img className='create-secret-btn' src={isNewSecretTriggered ? closeCreate : createSign} onClick={() => {setIsNewSecretTriggered(!isNewSecretTriggered); setNewGroupTitle('')}} />
+                    <img className='create-secret-btn' src={isNewSecretTriggered ? closeCreate : createSign} onClick={() => { setIsNewSecretTriggered(!isNewSecretTriggered); setNewGroupTitle('')}} />
                 </div>
                 <div className='secrets-content-container'>
                     {
                         groupsList.map((group: GroupSecretsData) => (
-                            <div className='group-secrets-content'>
+                            <div className='group-secrets-content' key={group.id}>
                                 <p className='secrets-values'>{group.title}</p>
                                 <p className='secrets-values'>Owner: {group.owner}</p>                            
                                 <div style={{ display: 'flex', alignItems: 'center', paddingRight: 20 }}>
                                     <p style={{ fontWeight: 'bolder', marginRight: 12 }}>{ group.members.length === 0 ? 'No members': 'Members:'}</p>
                                     {                                        
                                         group.members.map((member: UserForHome, index: number) => (
-                                            <div style={{ display: 'flex' }}>
+                                            <div style={{ display: 'flex' }} key={member.id}>
                                                 <p>{member.userName}</p>
                                                 { index < group.members.length - 1 
                                                     && <p>,</p>

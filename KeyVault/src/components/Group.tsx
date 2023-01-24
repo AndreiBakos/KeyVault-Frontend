@@ -19,7 +19,30 @@ interface GroupProps {
 
 export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsList, isGroupEntered, setIsGroupEntered }: GroupProps ) {
     const [ isNewSecretTriggered, setIsNewSecretTriggered ] = useState<boolean>(false);
-    const [ newSecretDescription, setNewSecretDescription ] = useState<string>('');
+    const [ newSecretTitle, setNewSecretTitle ] = useState<string>('');
+    const [ newSecretContent, setNewSecretContent ] = useState<string>('');
+    console.log(isNewSecretTriggered);
+    const createSecret = () => {        
+        //make Api call here
+
+        const newGroupSecret: Secret = {
+            id: 3,
+            title: newSecretTitle,
+            content: newSecretContent,
+            dateCreated: '24/12/2023'
+        }
+        const newGroup: GroupSecretsData = {
+            id: currentGroup.id,
+            title: currentGroup.title,
+            secrets: [newGroupSecret, ...currentGroup.secrets],
+            members: currentGroup.members,
+            owner: currentGroup.owner
+        }
+        setNewSecretTitle('');
+        setNewSecretContent('');
+        setCurrentGroup(newGroup);
+        setIsNewSecretTriggered(!isNewSecretTriggered);
+    }
 
     const removeGroup = () => {
         const newGroupsList = groupsList.filter((group: GroupSecretsData) => group.id !== currentGroup.id);
@@ -48,19 +71,20 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
                     <button className='delete-group-btn' type='submit' onClick={() => removeGroup()}>Delete Group</button>
                 </div>
                 <div style={{ justifyContent: !isNewSecretTriggered ? 'flex-end' : 'space-between', alignItems: 'center' }} className='create-secret-conatiner'>
-                    <label hidden={!isNewSecretTriggered} >Enter Secret Title</label>
-                    <input hidden={!isNewSecretTriggered}  className='create-secret-input' type='text' value={newSecretDescription} onChange={(e) => setNewSecretDescription(e.target.value)} />
+                    <label hidden={!isNewSecretTriggered}>Enter Secret Title</label>
+                    <input hidden={!isNewSecretTriggered}  className='create-secret-input' type='text' value={newSecretTitle} onChange={(e) => setNewSecretTitle(e.target.value)} />
                     <img className='create-secret-btn' src={isNewSecretTriggered ? closeCreate : createSign} onClick={() => setIsNewSecretTriggered(!isNewSecretTriggered)} />
                 </div>
                 <div className='secrets-content-container'>
                     {      
                         isNewSecretTriggered                        
                         ? 
-                        <div>
+                        <div style={{ backgroundColor: '#363636' }}>
                             <div style={{ display:'flex', flexDirection: 'row' }} className='create-secret-conatiner'>
                                 <label hidden={!isNewSecretTriggered} style={{ fontSize:  18, marginTop: 20, marginBottom: 20 }}>Enter Secret Content</label>
-                                <input hidden={!isNewSecretTriggered}  className='create-secret-content-input' type='text' value={newSecretDescription} onChange={(e) => setNewSecretDescription(e.target.value)} />
+                                <input hidden={!isNewSecretTriggered}  className='create-secret-content-input' type='text' value={newSecretContent} onChange={(e) => setNewSecretContent(e.target.value)} />
                             </div>
+                            <button className='submit-new-secret' type='submit' onClick={() => createSecret()}>Create Secret</button>
                         </div> 
                         :              
                         currentGroup.secrets.map((secret: Secret) => (
