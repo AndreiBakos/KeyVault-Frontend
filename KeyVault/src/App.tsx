@@ -13,7 +13,7 @@ function App() {
       case Page.LogIn: return (<LogIn setScreen={setScreen} />)
       case Page.SignUp: return (<SignUp setScreen={setScreen} />)
       case Page.Home: return (<Home setScreen={setScreen} />)
-      default: return (<Home setScreen={setScreen} />)
+      default: return (<LogIn setScreen={setScreen} />)
     }
   }
 

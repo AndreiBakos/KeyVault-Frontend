@@ -18,6 +18,13 @@ export interface UserForHome {
     email: string
 }
 
+export interface UserForHomeSearch {
+    id: number,
+    userName: string,
+    email: string,
+    checked: boolean
+}
+
 export interface GroupSecretsData {
     id: number,
     title: string,

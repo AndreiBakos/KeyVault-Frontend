@@ -39,12 +39,12 @@ export default function LogIn( { setScreen }: any ) {
             <div className='form-container' style={{ width: screen.width / 2.5 }}>
                 <div className='form-group'>
                     <label> Email:</label>
-                    <input className="form-control" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <input style={{ border: 0 }} className="form-control" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div className='form-group'>
                     <label> Password:</label>
                     <div className='password-input-container'>
-                        <input style={{ border: 0, width: '90%', outline: 'none' }} className="form-control" type={ isHidden ? 'password' : 'text' } value={password} onChange={(e) => setPassword(e.target.value)} />
+                        <input style={{ border: 0, width: '90%', backgroundColor: '#ffffff00' }} className="form-control" type={ isHidden ? 'password' : 'text' } value={password} onChange={(e) => setPassword(e.target.value)} />
                         <img className='show-hide-password' style={{ width: 40, height: 40, alignSelf: 'center'  }} src={isHidden ? hidePassword :showPassword} onClick={() => setIsHidden(!isHidden)} />
                     </div>
                 </div>

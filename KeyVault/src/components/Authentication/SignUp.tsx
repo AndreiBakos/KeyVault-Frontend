@@ -54,7 +54,7 @@ export default function SignUp( { setScreen }: any ) {
             <div className='form-group'>
             <label> Password:</label>
             <div className='password-input-container'>
-                <input style={{ border: 0, width: '90%', outline: 'none' }} className="form-control" type={ isHidden ? 'password' : 'text' } value={password} onChange={(e) => setPassword(e.target.value)} />
+                <input style={{ border: 0, width: '90%', backgroundColor: '#ffffff00' }} className="form-control" type={ isHidden ? 'password' : 'text' } value={password} onChange={(e) => setPassword(e.target.value)} />
                 <img className='show-hide-password' style={{ width: 40, height: 40, alignSelf: 'center'  }} src={isHidden ? hidePassword :showPassword} onClick={() => setIsHidden(!isHidden)} />
             </div>
             </div>
@@ -62,7 +62,7 @@ export default function SignUp( { setScreen }: any ) {
             <p>Already have an account?</p>
             <button className='log-in-button' onClick={() => setScreen(Page.LogIn)}>Log In</button>
             </div>
-            <button className='submit-btn' onClick={handleSubmit}>Login</button>
+            <button className='submit-btn' onClick={handleSubmit}>Sign Up</button>
         </div>
         </div>
   )

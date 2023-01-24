@@ -1,10 +1,13 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { GroupSecretsData, Secret, UserForHome } from '../data/UserSecrets';
+import { GroupSecretsData, Secret, UserForHome, UserForHomeSearch } from '../data/UserSecrets';
 import createSign from '../assets/create-sign.svg';
 import closeCreate from '../assets/close-create.svg';
 import enterGroupSecret from '../assets/acces-group-secret.svg';
 import backToGroups from '../assets/back-to-groups.svg';
 import deleteBtn from '../assets/delete-icon.svg';
+import searchUser from '../assets/search-logo.svg';
+import checkedBox from '../assets/checked-box-logo.svg';
+import uncheckedBox from '../assets/unchecked-box-logo.svg';
 import '../Home.css'
 
 interface GroupProps {
@@ -21,7 +24,12 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
     const [ isNewSecretTriggered, setIsNewSecretTriggered ] = useState<boolean>(false);
     const [ newSecretTitle, setNewSecretTitle ] = useState<string>('');
     const [ newSecretContent, setNewSecretContent ] = useState<string>('');
-    console.log(isNewSecretTriggered);
+    const [ isNewMemberTriggered, setIsNewMemberTriggered ] = useState<boolean>(false);
+    const [ foundUsers, setFoundUsers ] = useState<UserForHomeSearch[]>([{id: 1, userName: 'AnaTest', email: 'ana@test.com', checked: false},{id: 2, userName: 'AndreiTest', email: 'andrei@test.com', checked: false}]);
+    const [ newUserName, setNewUserName ] = useState<string>('');
+    const [ noUserFoundErrorTrigger, setNoUserFoundErrorTrigger ] = useState<string>('');
+    const [ selectedUsersList, setSelectedUsersList ] = useState<UserForHome[]>([]);
+
     const createSecret = () => {        
         //make Api call here
 
@@ -60,6 +68,30 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
         }
         setCurrentGroup(newGroup);
     }
+    const handleCheckBox = ( user: UserForHomeSearch ) => {   
+        const newFoundUsersList = foundUsers.map((userParam: UserForHomeSearch) => {
+            if(userParam.id === user.id){
+                return {...userParam, checked: !userParam.checked}
+            }
+            return userParam;
+        })        
+        setFoundUsers(newFoundUsersList);
+        
+        const hasParamUser = selectedUsersList.find((userParam) => userParam.id === user.id)
+        if(hasParamUser === undefined) {
+            
+            // const newSelectedUserList: UserForHome = [...selectedUsersList, user]
+            setSelectedUsersList((userParam: UserForHome[]) => [...userParam, {
+                id: user.id,
+                userName: user.userName,
+                email: user.email
+            }]); 
+            // console.log(selectedUsersList)
+        }else {
+            const newSelectedUserList = selectedUsersList.filter((userParam: UserForHome) => userParam.id !== user.id)
+            setSelectedUsersList(newSelectedUserList);
+        }
+    }
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', marginTop: 10 }}>
@@ -70,10 +102,32 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
                     </div>
                     <button className='delete-group-btn' type='submit' onClick={() => removeGroup()}>Delete Group</button>
                 </div>
-                <div style={{ justifyContent: !isNewSecretTriggered ? 'flex-end' : 'space-between', alignItems: 'center' }} className='create-secret-conatiner'>
-                    <label hidden={!isNewSecretTriggered}>Enter Secret Title</label>
-                    <input hidden={!isNewSecretTriggered}  className='create-secret-input' type='text' value={newSecretTitle} onChange={(e) => setNewSecretTitle(e.target.value)} />
-                    <img className='create-secret-btn' src={isNewSecretTriggered ? closeCreate : createSign} onClick={() => setIsNewSecretTriggered(!isNewSecretTriggered)} />
+                <div style={{ justifyContent: 'space-between', alignItems: 'center' }} className='create-secret-conatiner'>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <img hidden={isNewSecretTriggered} className='create-secret-btn' src={isNewMemberTriggered ? closeCreate : createSign} onClick={() => setIsNewMemberTriggered(!isNewMemberTriggered)} />
+                        <label hidden={isNewSecretTriggered} style={{ paddingLeft: 15 }}>Add Member</label>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', width: '70%' }}>
+                        {
+                            isNewMemberTriggered
+                            ?
+                                <>
+                                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                        <input hidden={!isNewMemberTriggered} className='create-secret-input' type='text' value={newUserName} onChange={(e) => {setNewUserName(e.target.value); setNoUserFoundErrorTrigger('')}} />
+                                        <img className='enter-group-secret' style={{ width: 35, height: 35, paddingLeft: 15 }} src={searchUser} onClick={() => setNoUserFoundErrorTrigger('No User Found!')} />
+                                    </div>        
+                                </>
+                            :
+                                <>                
+                                    <label hidden={!isNewSecretTriggered}>Enter Secret Title</label>
+                                    <input hidden={!isNewSecretTriggered}  className='create-secret-input' type='text' value={newSecretTitle} onChange={(e) => setNewSecretTitle(e.target.value)} />
+                                </>
+                        }
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <label hidden={isNewMemberTriggered} style={{ paddingRight: 15 }}>Create Secret</label>
+                        <img hidden={isNewMemberTriggered} className='create-secret-btn' src={isNewSecretTriggered ? closeCreate : createSign} onClick={() => setIsNewSecretTriggered(!isNewSecretTriggered)} />
+                    </div>
                 </div>
                 <div className='secrets-content-container'>
                     {      
@@ -86,7 +140,29 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
                             </div>
                             <button className='submit-new-secret' type='submit' onClick={() => createSecret()}>Create Secret</button>
                         </div> 
-                        :              
+                        : 
+                        isNewMemberTriggered                        
+                        ? 
+                        <div style={{ backgroundColor: '#363636' }}>
+                            <div style={{ display:'flex', flexDirection: 'column' }} className='create-secret-conatiner'>
+                                {
+                                    foundUsers.length === 0 && newUserName.length > 0
+                                    ?
+                                        <label>{noUserFoundErrorTrigger}</label>
+                                    :
+                                    foundUsers.map((user: UserForHomeSearch) => (
+                                        <div className='secrets-content' key={user.id}>
+                                            <p className='secrets-values'>{user.userName}</p>
+                                            <p className='secrets-values'>{user.email}</p>
+                                            <img className='delete-secret-btn' src={user.checked ? checkedBox : uncheckedBox} onClick={() => handleCheckBox(user)} />
+                                        </div>
+                                        )
+                                    )
+                                }
+                            </div>
+                            <button className='submit-new-secret' type='submit' onClick={() => console.log(selectedUsersList)}>Add User</button>
+                        </div> 
+                        :       
                         currentGroup.secrets.map((secret: Secret) => (
                             <div className='secrets-content' key={secret.id}>
                                 <p className='secrets-values'>{secret.title}</p>
