@@ -18,6 +18,9 @@ interface GroupProps {
 
 
 export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsList, isGroupEntered, setIsGroupEntered }: GroupProps ) {
+    const [ isNewSecretTriggered, setIsNewSecretTriggered ] = useState<boolean>(false);
+    const [ newSecretDescription, setNewSecretDescription ] = useState<string>('');
+
     const removeGroup = () => {
         const newGroupsList = groupsList.filter((group: GroupSecretsData) => group.id !== currentGroup.id);
         setGroupsList(newGroupsList);
@@ -44,8 +47,22 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
                     </div>
                     <button className='delete-group-btn' type='submit' onClick={() => removeGroup()}>Delete Group</button>
                 </div>
+                <div style={{ justifyContent: !isNewSecretTriggered ? 'flex-end' : 'space-between', alignItems: 'center' }} className='create-secret-conatiner'>
+                    <label hidden={!isNewSecretTriggered} >Enter Secret Title</label>
+                    <input hidden={!isNewSecretTriggered}  className='create-secret-input' type='text' value={newSecretDescription} onChange={(e) => setNewSecretDescription(e.target.value)} />
+                    <img className='create-secret-btn' src={isNewSecretTriggered ? closeCreate : createSign} onClick={() => setIsNewSecretTriggered(!isNewSecretTriggered)} />
+                </div>
                 <div className='secrets-content-container'>
-                    {                    
+                    {      
+                        isNewSecretTriggered                        
+                        ? 
+                        <div>
+                            <div style={{ display:'flex', flexDirection: 'row' }} className='create-secret-conatiner'>
+                                <label hidden={!isNewSecretTriggered} style={{ fontSize:  18, marginTop: 20, marginBottom: 20 }}>Enter Secret Content</label>
+                                <input hidden={!isNewSecretTriggered}  className='create-secret-content-input' type='text' value={newSecretDescription} onChange={(e) => setNewSecretDescription(e.target.value)} />
+                            </div>
+                        </div> 
+                        :              
                         currentGroup.secrets.map((secret: Secret) => (
                             <div className='secrets-content' key={secret.id}>
                                 <p className='secrets-values'>{secret.title}</p>

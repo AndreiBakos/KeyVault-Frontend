@@ -63,6 +63,19 @@ li {
     height: 10px;
 }
 
+.create-secret-content-input {
+    border: 0px;
+    outline: none;
+    width: 60%;
+    border-radius: 10px;
+    background-color: #ffffff4e;
+    color: #ebe3e3;
+    font-weight: 800;
+    padding: 20px;
+    height: 10px;
+    margin-left: 4%;
+}
+
 .create-secret-btn {
     width: 30px;
     height: 30px;    
@@ -88,7 +101,6 @@ li {
     background-color: #5c575735;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     border-radius: 10px;
 }
 
@@ -142,4 +154,24 @@ li {
 .delete-group-btn:focus,
 .delete-group-btn:focus-visible {
     outline: 4px auto -webkit-focus-ring-color;
+}
+
+.submit-new-secret {
+    width: 15rem;
+    justify-content:end;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: .8em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #0f8b6e;
+    cursor: pointer;
+    transition: border-color 0.25s;
+    margin-left: 80%;
+    margin-top: 20px;
+}
+
+.submit-new-secret:hover {
+    border-color: #646cff;
 }

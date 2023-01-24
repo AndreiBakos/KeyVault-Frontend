@@ -8,12 +8,14 @@ export interface Secret {
 export interface User {
     id: number,
     userName: string,
+    email: string,
     password: string,    
 }
 
 export interface UserForHome {
     id: number,
-    userName: string
+    userName: string,
+    email: string
 }
 
 export interface GroupSecretsData {
