@@ -5,9 +5,9 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+  color: #ffffffde;
+  /* background-color: #526a58; */
+  background-color: #5c575735;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -17,7 +17,9 @@
 .header-text {
   font-size: 40px;
 }
-
+input {
+  outline: none;
+}
 .submit-btn {
   width: 15rem;
   align-self: center;
@@ -27,16 +29,12 @@
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #040e1c;
+  background-color: #5c5757;
   cursor: pointer;
   transition: border-color 0.25s;
 }
 .submit-btn:hover {
   border-color: #646cff;
-}
-.submit-btn:focus,
-.submit-btn:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
 }
 
 @media (prefers-color-scheme: light) {
@@ -59,7 +57,7 @@
   font-size: 1em;
   background-color: transparent;
   cursor: pointer;
-  color: #e14a4a;
+  color: #a61111;
 }
 
 .sign-up-button:hover {
@@ -83,7 +81,6 @@
 }
 
 label {
-  color: #000000;
   font-weight: bold;
 }
 
@@ -93,11 +90,11 @@ label {
   align-self: center;
   justify-content: center;
   align-items: ce;
-  background-color: #d9d2d2;
+  background-color: #ffffff0c;
   background-blend-mode: multiply, multiply;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0px 0px 12px 10px rgba(0,0,0,0.3);
+  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.2);
   width: 300px;
   margin: 0 auto;
   text-align: center;
@@ -114,7 +111,7 @@ label {
   padding: 12px 20px;
   margin: 8px 0;
   box-sizing: border-box;
-  background-color: white;
+  background-color: #ffffffde;
   border: 1.5px solid rgb(0, 0, 0);
   border-radius: 8px;
   color: #000000;
@@ -127,7 +124,7 @@ label {
 .password-input-container {
   display: flex;
   flex-direction: row;
-  background-color: white;
+  background-color: #ffffffde;
   border: 1.5px solid black;
   border-radius: 8px;
   padding: 0;

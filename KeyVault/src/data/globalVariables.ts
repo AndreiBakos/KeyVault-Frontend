@@ -3,3 +3,8 @@ export enum Page {
     SignUp = 1,
     Home = 2
 }
+
+export enum SecretsPage {
+    MySecrets = 0,
+    GroupSecrets = 1
+}
