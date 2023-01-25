@@ -18,6 +18,12 @@ export interface UserForHome {
     email: string
 }
 
+export interface UserForCreation {
+    userName: string,
+    email: string,
+    password: string
+}
+
 export interface UserForHomeSearch {
     id: number,
     userName: string,

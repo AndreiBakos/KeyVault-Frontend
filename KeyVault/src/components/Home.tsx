@@ -8,7 +8,7 @@ import MySecrets from './MySecrets';
 import GroupSecrets from './GroupSecrets';
 import '../Home.css'
 
-export default function Home ( { setScreen }: any ) {
+export default function Home ( { setScreen, loggedInUser, setLoggedInUser }: any ) {
     const [ isSettingsMenu , setIsSettingsMenu ] = useState<boolean>(false);
     const [ userSecrets, setUserSecrets ] = useState<Secret[]>(secrets);
     const [ groupsList, setGroupsList ] = useState<GroupSecretsData[]>(groupSecretsData);
@@ -26,7 +26,7 @@ export default function Home ( { setScreen }: any ) {
     return (
         <div>
             <div className='header-menu'>
-                <h1 style={{ fontWeight: 'bolder', fontSize: 40 }}>Welcome, Andrei</h1>
+                <h1 style={{ fontWeight: 'bolder', fontSize: 40 }}>Welcome, {loggedInUser.userName}</h1>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <img className='settings-menu' style={{ marginRight: 15 }} src={settingsLogo} width={50} height={50} onClick={() => setIsSettingsMenu(!isSettingsMenu)} />
                     <ul className='settings-menu' hidden={!isSettingsMenu}>
