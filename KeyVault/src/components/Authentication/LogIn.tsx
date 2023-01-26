@@ -8,7 +8,7 @@ import axios from 'axios';
 export default function LogIn( { setScreen, loggedInUser, setLoggedInUser }: any ) {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [ isHidden, setIsHidden ] = useState<boolean>(false);
+    const [ isHidden, setIsHidden ] = useState<boolean>(true);
 
     const handleSubmit = async() => {    
         if(email.length == 0 || password.length === 0) {

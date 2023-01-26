@@ -6,7 +6,6 @@ export const api = axios.create({
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     }
 });
-  
 
 export enum Page {
     LogIn = 0,

@@ -22,11 +22,13 @@ export const groupSecretsData: GroupSecretsData[] = [
         members: [
             {
                 id: 1,
-                userName: 'AndreiTest'
+                userName: 'AndreiTest',
+                email: 'andrei@test.test'
             },
             {
                 id: 2,
-                userName: 'MihaiTest'
+                userName: 'MihaiTest',
+                email: 'mihai@test.test'
             }
         ],
         owner: 'AnaTest'
@@ -52,15 +54,18 @@ export const groupSecretsData: GroupSecretsData[] = [
         members: [
             {
                 id: 1,
-                userName: 'AndreiTest'
+                userName: 'AndreiTest',
+                email: 'andrei@test.test'
             },
             {
                 id: 2,
-                userName: 'MihaiTest'
+                userName: 'MihaiTest',
+                email: 'mihai@test.test'
             },
             {
                 id: 3,
-                userName: 'IoanTest'
+                userName: 'IoanTest',
+                email: 'ioan@test.test'
             }
         ],
         owner: 'AndreiTest'

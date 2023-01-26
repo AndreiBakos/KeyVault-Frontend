@@ -9,6 +9,7 @@ import searchUser from '../assets/search-logo.svg';
 import checkedBox from '../assets/checked-box-logo.svg';
 import uncheckedBox from '../assets/unchecked-box-logo.svg';
 import '../Home.css'
+import { api } from '../data/globalVariables';
 
 interface GroupProps {
     currentGroup: GroupSecretsData,
@@ -25,7 +26,7 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
     const [ newSecretTitle, setNewSecretTitle ] = useState<string>('');
     const [ newSecretContent, setNewSecretContent ] = useState<string>('');
     const [ isNewMemberTriggered, setIsNewMemberTriggered ] = useState<boolean>(false);
-    const [ foundUsers, setFoundUsers ] = useState<UserForHomeSearch[]>([{id: 1, userName: 'AnaTest', email: 'ana@test.com', checked: false},{id: 2, userName: 'AndreiTest', email: 'andrei@test.com', checked: false}]);
+    const [ foundUsers, setFoundUsers ] = useState<UserForHomeSearch[]>([]);
     const [ newUserName, setNewUserName ] = useState<string>('');
     const [ noUserFoundErrorTrigger, setNoUserFoundErrorTrigger ] = useState<string>('');
     const [ selectedUsersList, setSelectedUsersList ] = useState<UserForHome[]>([]);
@@ -68,6 +69,17 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
         }
         setCurrentGroup(newGroup);
     }
+
+    const checkForUsers = async() => {
+
+        const response = await api.get(`https://localhost:5001/api/users?userName=${newUserName}`);
+
+        const users: UserForHome[] = response.data;
+        const filteredUsers = users.filter((user) => currentGroup.members.indexOf(user) === -1 && user.userName !== currentGroup.owner);
+        const newUsers: UserForHomeSearch[] = filteredUsers.map((user: UserForHome) => {return {...user, checked: false}});
+        setFoundUsers(newUsers);
+    }
+
     const handleCheckBox = ( user: UserForHomeSearch ) => {   
         const newFoundUsersList = foundUsers.map((userParam: UserForHomeSearch) => {
             if(userParam.id === user.id){
@@ -79,18 +91,26 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
         
         const hasParamUser = selectedUsersList.find((userParam) => userParam.id === user.id)
         if(hasParamUser === undefined) {
-            
-            // const newSelectedUserList: UserForHome = [...selectedUsersList, user]
             setSelectedUsersList((userParam: UserForHome[]) => [...userParam, {
                 id: user.id,
                 userName: user.userName,
                 email: user.email
-            }]); 
-            // console.log(selectedUsersList)
+            }]);             
         }else {
             const newSelectedUserList = selectedUsersList.filter((userParam: UserForHome) => userParam.id !== user.id)
             setSelectedUsersList(newSelectedUserList);
         }
+    }
+
+    const addUsersToGroup = async() => {
+        console.log(selectedUsersList);
+        setCurrentGroup({
+            id: currentGroup.id,
+            title: currentGroup.title,
+            secrets: currentGroup.secrets,
+            members: [...currentGroup.members, selectedUsersList],
+            owner: currentGroup.owner
+        })
     }
 
     return (
@@ -114,7 +134,7 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
                                 <>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <input hidden={!isNewMemberTriggered} className='create-secret-input' type='text' value={newUserName} onChange={(e) => {setNewUserName(e.target.value); setNoUserFoundErrorTrigger('')}} />
-                                        <img className='enter-group-secret' style={{ width: 35, height: 35, paddingLeft: 15 }} src={searchUser} onClick={() => setNoUserFoundErrorTrigger('No User Found!')} />
+                                        <img className='enter-group-secret' style={{ width: 35, height: 35, paddingLeft: 15 }} src={searchUser} onClick={() => checkForUsers()} />
                                     </div>        
                                 </>
                             :
@@ -160,7 +180,7 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
                                     )
                                 }
                             </div>
-                            <button className='submit-new-secret' type='submit' onClick={() => console.log(selectedUsersList)}>Add User</button>
+                            <button className='submit-new-secret' type='submit' onClick={() => addUsersToGroup()}>Add User</button>
                         </div> 
                         :       
                         currentGroup.secrets.map((secret: Secret) => (
