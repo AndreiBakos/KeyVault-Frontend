@@ -31,7 +31,12 @@ export default function LogIn( { setScreen, loggedInUser, setLoggedInUser }: any
         const token = response.data.jwt;
         localStorage.setItem('token', token);
 
-        const user = (await api.get(`/users/login?email=${email}&password=${password}`)).data;
+        const userResponse = await axios.get(`https://localhost:5001/api/users/login?email=${email}&password=${password}`, {headers: {'Authorization': `Bearer ${token}`}});
+        if(userResponse.status === 204){
+            alert('Invalid credentials');
+            return
+        }
+        const user = userResponse.data;
         setLoggedInUser(user);
         setScreen(Page.Home);
     }

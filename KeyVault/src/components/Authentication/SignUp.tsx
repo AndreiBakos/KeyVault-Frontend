@@ -4,7 +4,6 @@ import { ValidateEmail } from '../../Utils/ValidateData';
 import showPassword  from '../../assets/show-password.svg';
 import hidePassword from '../../assets/hide-password.svg';
 import axios from 'axios';
-import { UserForCreation, UserForHome } from '../../data/UserSecrets';
 
 export default function SignUp( { setScreen, loggedInUser, setLoggedInUser  }: any ) {
     const [userName, setUserName] = useState<string>('');
@@ -43,8 +42,13 @@ export default function SignUp( { setScreen, loggedInUser, setLoggedInUser  }: a
         const token = response.data.jwt;
 
         localStorage.setItem('token', token);
-        const user = (await api.post('https://localhost:5001/api/users/create', newUser)).data;
 
+        const userResponse = await axios.post(`https://localhost:5001/api/users/create`, newUser, {headers: {'Authorization': `Bearer ${token}`}});
+        if(userResponse.status === 204){
+            alert('Invalid credentials');
+            return
+        }
+        const user = userResponse.data;
         setLoggedInUser(user);
         setScreen(Page.Home);
     }
@@ -69,7 +73,7 @@ export default function SignUp( { setScreen, loggedInUser, setLoggedInUser  }: a
             </div>
             </div>
             <div style={{ display: 'flex', color: 'black', alignSelf: 'center' }}>
-            <p>Already have an account?</p>
+            <p style={{ color: 'white' }}>Already have an account?</p>
             <button className='log-in-button' onClick={() => setScreen(Page.LogIn)}>Log In</button>
             </div>
             <button className='submit-btn' onClick={handleSubmit}>Sign Up</button>
