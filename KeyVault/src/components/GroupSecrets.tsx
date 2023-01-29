@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Page, SecretsPage } from '../data/globalVariables';
-import { emptyGroup, emptySecret, GroupSecretsData, Secret, UserForHome } from '../data/UserSecrets';
-import { secrets } from '../data/MockData/UserSecrets';
+import { api, Page, SecretsPage } from '../data/globalVariables';
+import { emptyGroup, GroupSecretsData, UserForHome } from '../data/UserSecrets';
 import { groupSecretsData } from '../data/MockData/GroupSecrets';
 import createSign from '../assets/create-sign.svg';
 import closeCreate from '../assets/close-create.svg';
@@ -11,7 +10,7 @@ import SubmitGroupName from '../assets/check-logo.svg';
 import '../Home.css'
 import Group from './Group';
 
-export default function GroupSecrets( { groupsList, setGroupsList }: any ) {
+export default function GroupSecrets( { loggedInUser, groupsList, setGroupsList }: any ) {
     const [ isNewSecretTriggered, setIsNewSecretTriggered ] = useState<boolean>(false);
     const [ isGroupEntered, setIsGroupEntered ] = useState<boolean>(false);
     const [ currentGroup, setCurrentGroup ] = useState<GroupSecretsData>(emptyGroup);
@@ -22,24 +21,31 @@ export default function GroupSecrets( { groupsList, setGroupsList }: any ) {
         setIsGroupEntered(!isGroupEntered);    
     }
 
-    const createNewGroup = () => {
-        //make Api call here
-
-        const newGroup: GroupSecretsData = {
-            id: 3,
+    const createNewGroup = async() => {
+        const response = await api.post('https://localhost:5001/api/groups', {
             title: newGroupTitle,
-            secrets: [],
-            members: [],
-            owner: 'AndreiTest'
-        };
+            ownerId: loggedInUser.id
+        })
+
+        const newGroup: GroupSecretsData = response.data;
         setGroupsList((groups: GroupSecretsData[]) => [newGroup, ...groups]);
         setNewGroupTitle('');
         setIsNewSecretTriggered(!isNewSecretTriggered);
 
     }
+
+    const getGroups = async() => {
+        const groups = await api.get(`https://localhost:5001/api/groups?userId=${loggedInUser.id}`);
+        setGroupsList(groups.data);
+    }
+
+    useEffect(() => {
+        getGroups();
+    },[currentGroup])
+
     if(isGroupEntered){
         return(
-            <Group currentGroup={currentGroup} setCurrentGroup={setCurrentGroup} groupsList={groupsList} setGroupsList={setGroupsList} isGroupEntered={isGroupEntered} setIsGroupEntered={setIsGroupEntered} />
+            <Group loggedInUser={loggedInUser} currentGroup={currentGroup} setCurrentGroup={setCurrentGroup} groupsList={groupsList} setGroupsList={setGroupsList} isGroupEntered={isGroupEntered} setIsGroupEntered={setIsGroupEntered} />
         )
     }else{
         return (
@@ -55,12 +61,13 @@ export default function GroupSecrets( { groupsList, setGroupsList }: any ) {
                 <div className='secrets-content-container'>
                     {
                         groupsList.map((group: GroupSecretsData) => (
-                            <div className='group-secrets-content' key={group.id}>
+                            <div className='group-secrets-content' key={group.groupId}>
                                 <p className='secrets-values'>{group.title}</p>
-                                <p className='secrets-values'>Owner: {group.owner}</p>                            
-                                <div style={{ display: 'flex', alignItems: 'center', paddingRight: 20 }}>
-                                    <p style={{ fontWeight: 'bolder', marginRight: 12 }}>{ group.members.length === 0 ? 'No members': 'Members:'}</p>
-                                    {                                        
+                                <p className='secrets-values'>Owner: {group.members[0].userName}</p>                            
+                                <div style={{ display: 'flex', alignItems: 'center', paddingRight: 20 }}>                                    
+                                    <p style={{ fontWeight: 'bolder', marginRight: 12 }}>{ group.members.length <= 1 ? 'No other members': 'Members:'}</p>
+                                    {                        
+                                        group.members.length > 1 &&                
                                         group.members.map((member: UserForHome, index: number) => (
                                             <div style={{ display: 'flex' }} key={member.id}>
                                                 <p>{member.userName}</p>

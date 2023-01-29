@@ -1,38 +1,47 @@
 import { useEffect, useState } from 'react';
-import { Page, SecretsPage } from '../data/globalVariables';
-import { GroupSecretsData, Secret, UserForHome } from '../data/UserSecrets';
-import { secrets } from '../data/MockData/UserSecrets';
-import { groupSecretsData } from '../data/MockData/GroupSecrets';
-import settingsLogo from '../assets/settings-logo.svg';
+import { api } from '../data/globalVariables';
+import {  Secret, SecretForCreation } from '../data/UserSecrets';
 import createSign from '../assets/create-sign.svg';
 import closeCreate from '../assets/close-create.svg';
-import enterGroupSecret from '../assets/acces-group-secret.svg';
 import deleteBtn from '../assets/delete-icon.svg';
 import '../Home.css'
 
-export default function MySecrets( { userSecrets, setUserSecrets }: any ) {
+export default function MySecrets( { loggedInUser, userSecrets, setUserSecrets }: any ) {
     const [ isNewSecretTriggered, setIsNewSecretTriggered ] = useState<boolean>(false);
     const [ newSecretTitle, setNewSecretTitle ] = useState<string>('');
     const [ newSecretDescription, setNewSecretContent ] = useState<string>('');
 
-    const createSecret = () => {        
+    const createSecret = async() => {        
         //make Api call here
 
-        const newUserSecret: Secret = {
-            id: 3,
+        const newUserSecret: SecretForCreation = {
             title: newSecretTitle,
             content: newSecretDescription,
-            dateCreated: '24/12/2023'
+            ownerId: loggedInUser.id
         }
+
+        await api.post('https://localhost:5001/api/secrets', newUserSecret);
         setUserSecrets((secrets: Secret[]) => [...secrets, newUserSecret]);
         setNewSecretTitle('');
         setNewSecretContent('');
         setIsNewSecretTriggered(!isNewSecretTriggered);
     }
-    const removeSecret = (secretId: number) => {
+
+    const removeSecret = async (secretId: string) => {
         const newSecretsList = userSecrets.filter((secret: Secret) => secret.id !== secretId);
-        setUserSecrets(newSecretsList) 
+        await api.delete(`https://localhost:5001/api/secrets?secretId=${secretId}`);
+        setUserSecrets(newSecretsList);
     }
+
+    const getSecrets = async() => {
+        const secrets = await api.get(`https://localhost:5001/api/secrets?ownerId=${loggedInUser.id}`);
+        setUserSecrets(secrets.data);
+    }
+
+    useEffect(() => {        
+        getSecrets();
+    },[]);
+
     return (
         <div>
             <div style={{ justifyContent: !isNewSecretTriggered ? 'flex-end' : 'space-between', alignItems: 'center' }} className='create-secret-conatiner'>

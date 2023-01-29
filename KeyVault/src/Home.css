@@ -156,6 +156,29 @@ li {
     outline: 4px auto -webkit-focus-ring-color;
 }
 
+.manage-members-btn {
+    width: 15rem;
+    align-self: center;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: .8em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #0b8a58;
+    cursor: pointer;
+    transition: border-color 0.25s;
+}
+
+.manage-members-btn:hover {
+    border-color: #ebe3e381;
+}
+
+.manage-members-btn:focus,
+.manage-members-btn:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+}
+
 .submit-new-secret {
     width: 15rem;
     justify-content:end;

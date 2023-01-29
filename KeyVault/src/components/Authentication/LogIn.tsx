@@ -1,37 +1,45 @@
 import { useEffect, useState } from 'react'
-import { Page } from '../../data/globalVariables';
+import { api, Page } from '../../data/globalVariables';
 import { ValidateEmail } from '../../Utils/ValidateData';
 import showPassword  from '../../assets/show-password.svg';
 import hidePassword from '../../assets/hide-password.svg';
+import axios from 'axios';
 
-export default function LogIn( { setScreen }: any ) {
+export default function LogIn( { setScreen, loggedInUser, setLoggedInUser }: any ) {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [ isHidden, setIsHidden ] = useState<boolean>(false);
+    const [ isHidden, setIsHidden ] = useState<boolean>(true);
 
-    const handleSubmit = () => {
+    const handleSubmit = async() => {    
         if(email.length == 0 || password.length === 0) {
             alert('Please fill in all fields!')
             return;
         }
-
+        
         if(!ValidateEmail(email)){
             alert('Invalid email provided!')
             return;
         }
-
+        
         if(password.length < 7) {
             alert('Password too short!');
             return;
         }
-
+        
         //Fetch Data here:
-        alert('Well Done')
-    }
+        const response = await api.get('/crypto')
+        const token = response.data.jwt;
+        localStorage.setItem('token', token);
 
-    useEffect(() => {
-        //fetch data from backend here
-    },[])
+        const userResponse = await axios.get(`https://localhost:5001/api/users/login?email=${email}&password=${password}`, {headers: {'Authorization': `Bearer ${token}`}});
+        if(userResponse.status === 204){
+            alert('Invalid credentials');
+            return
+        }
+        const user = userResponse.data;
+        setLoggedInUser(user);
+        setScreen(Page.Home);
+    }
 
     return (
         <div className="App" style={{ display: 'grid', placeItems: 'center', height: screen.height / 1.6}}>
@@ -49,7 +57,7 @@ export default function LogIn( { setScreen }: any ) {
                     </div>
                 </div>
                 <div style={{ display: 'flex', color: 'black', alignSelf: 'center' }}>
-                    <p>Don't have an account?</p>
+                    <p style={{ color: '#ffffffee' }}>Don't have an account?</p>
                     <button className='sign-up-button' onClick={() => setScreen(Page.SignUp)}>Sign Up</button>
                 </div>
                 <button className='submit-btn' type='submit' onClick={handleSubmit}>Login</button>

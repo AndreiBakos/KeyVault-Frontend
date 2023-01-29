@@ -1,14 +1,16 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { GroupSecretsData, Secret, UserForHome, UserForHomeSearch } from '../data/UserSecrets';
+import { GroupSecretsData, GroupSecretsDataForCreation, Secret, UserForHome, UserForHomeSearch } from '../data/UserSecrets';
+import { api } from '../data/globalVariables';
 import createSign from '../assets/create-sign.svg';
 import closeCreate from '../assets/close-create.svg';
-import enterGroupSecret from '../assets/acces-group-secret.svg';
 import backToGroups from '../assets/back-to-groups.svg';
-import deleteBtn from '../assets/delete-icon.svg';
 import searchUser from '../assets/search-logo.svg';
-import checkedBox from '../assets/checked-box-logo.svg';
-import uncheckedBox from '../assets/unchecked-box-logo.svg';
+import NewMemberScreen from './GroupComponents/NewMemberScreen';
+import NewSecretsScreen from './GroupComponents/NewSecretsScreen';
+import Secrets from './GroupComponents/Secrets';
 import '../Home.css'
+import GroupMembers from './GroupComponents/GroupMembers';
+import axios from 'axios';
 
 interface GroupProps {
     currentGroup: GroupSecretsData,
@@ -16,58 +18,154 @@ interface GroupProps {
     groupsList: GroupSecretsData[],
     setGroupsList: Dispatch<SetStateAction<GroupSecretsData[]>>,
     isGroupEntered: SetStateAction<boolean>,
-    setIsGroupEntered: Dispatch<SetStateAction<boolean>>
+    setIsGroupEntered: Dispatch<SetStateAction<boolean>>,
+    loggedInUser: any
 }
 
 
-export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsList, isGroupEntered, setIsGroupEntered }: GroupProps ) {
+export default function( { loggedInUser, currentGroup, setCurrentGroup, groupsList, setGroupsList, isGroupEntered, setIsGroupEntered }: GroupProps ) {
     const [ isNewSecretTriggered, setIsNewSecretTriggered ] = useState<boolean>(false);
     const [ newSecretTitle, setNewSecretTitle ] = useState<string>('');
     const [ newSecretContent, setNewSecretContent ] = useState<string>('');
     const [ isNewMemberTriggered, setIsNewMemberTriggered ] = useState<boolean>(false);
-    const [ foundUsers, setFoundUsers ] = useState<UserForHomeSearch[]>([{id: 1, userName: 'AnaTest', email: 'ana@test.com', checked: false},{id: 2, userName: 'AndreiTest', email: 'andrei@test.com', checked: false}]);
+    const [ foundUsers, setFoundUsers ] = useState<UserForHomeSearch[]>([]);
     const [ newUserName, setNewUserName ] = useState<string>('');
     const [ noUserFoundErrorTrigger, setNoUserFoundErrorTrigger ] = useState<string>('');
     const [ selectedUsersList, setSelectedUsersList ] = useState<UserForHome[]>([]);
+    const [ groupSecrets, setGroupSecrets ] = useState<Secret[]>([]);
+    const [ newMembersPageTrigger, setNewMembersPageTrigger ] = useState(false);
+    const [ groupMembers, setGroupMembers ] = useState<UserForHomeSearch[]>([]);
+    const [ selectedMembers, setSelectedMembers ] = useState<string[]>([]);
 
-    const createSecret = () => {        
-        //make Api call here
+    const handleScreenChanges = () => {
+        if(isNewSecretTriggered) {
+            return (
+                <NewSecretsScreen 
+                    isNewSecretTriggered={isNewSecretTriggered}
+                    createSecret={createSecret} 
+                    newSecretContent={newSecretContent}
+                    setNewSecretContent={setNewSecretContent} />
+            );
+        }
 
-        const newGroupSecret: Secret = {
-            id: 3,
-            title: newSecretTitle,
-            content: newSecretContent,
-            dateCreated: '24/12/2023'
+        if(isNewMemberTriggered) {
+            return (
+                <NewMemberScreen 
+                    foundUsers={foundUsers}
+                    newUserName={newUserName}
+                    noUserFoundErrorTrigger={noUserFoundErrorTrigger}
+                    addUsersToGroup={addUsersToGroup}
+                    handleCheckBox={handleCheckBox} />
+            );
         }
-        const newGroup: GroupSecretsData = {
-            id: currentGroup.id,
-            title: currentGroup.title,
-            secrets: [newGroupSecret, ...currentGroup.secrets],
-            members: currentGroup.members,
-            owner: currentGroup.owner
+
+        if(newMembersPageTrigger){
+            return <GroupMembers 
+                selectedMembers={selectedMembers}
+                groupMembers={groupMembers}
+                handleCheckBoxForMembers={handleCheckBoxForMembers}
+                removeMembers={removeMembers} />
         }
+
+        return (
+            <Secrets 
+                groupSecrets={groupSecrets}
+                removeSecret={removeSecret} />
+        );
+    }
+
+    const getGroupMembers = async() => {
+        setNewMembersPageTrigger(!newMembersPageTrigger);
+        const response = await api.get(`https://localhost:5001/api/groups/members?groupId=${currentGroup.groupId}`);
+
+        const newMembers: UserForHomeSearch[] = response.data.map((member: UserForHome) => {return {...member, checked: true}});        
+
+        setGroupMembers(newMembers);
+    }
+
+    const getGroupSecrets = async() => {
+        const secrets:Secret[] = await (await api.get(`https://localhost:5001/api/groups/secrets?groupId=${currentGroup.groupId}`)).data;
+        setGroupSecrets(secrets);
+    }
+
+    const createSecret = async () => {        
+        const newGroupSecret: GroupSecretsDataForCreation = {
+            groupId: currentGroup.groupId,
+            secret: {
+                title: newSecretTitle,
+                content: newSecretContent,
+                ownerId: loggedInUser.id
+            }
+        }
+        
+        const response: Secret = await (await api.post('https://localhost:5001/api/groups/secrets', newGroupSecret)).data
+        setGroupSecrets((groupSecrets) => [...groupSecrets, response]);
         setNewSecretTitle('');
         setNewSecretContent('');
-        setCurrentGroup(newGroup);
         setIsNewSecretTriggered(!isNewSecretTriggered);
     }
 
-    const removeGroup = () => {
-        const newGroupsList = groupsList.filter((group: GroupSecretsData) => group.id !== currentGroup.id);
+    const removeGroup = async() => {
+        await api.delete(`https://localhost:5001/api/groups?groupId=${currentGroup.groupId}`);
+
+        const newGroupsList = groupsList.filter((group: GroupSecretsData) => group.groupId !== currentGroup.groupId);
         setGroupsList(newGroupsList);
         setIsGroupEntered(!isGroupEntered)
     }
 
-    const removeSecret = (secretId: number) => {
-        const newGroup: GroupSecretsData = {
-            id: currentGroup.id,
-            title: currentGroup.title,
-            secrets: currentGroup.secrets.filter((secret: Secret) => secret.id !== secretId),
-            members: currentGroup.members,
-            owner: currentGroup.owner
-        }
-        setCurrentGroup(newGroup);
+    const removeSecret = async(secretId: string) => {
+        await api.delete(`https://localhost:5001/api/groups/secrets?secretId=${secretId}`);
+
+        const newGroupSecrets = groupSecrets.filter((groupSecrets: Secret) => groupSecrets.id !== secretId);
+        setGroupSecrets(newGroupSecrets);
     }
+
+    const removeMembers = async() => {        
+        await api.delete(`https://localhost:5001/api/groups/members?ids=${selectedMembers}`);
+
+        const newMembersList = currentGroup.members.filter((member) => selectedMembers.indexOf(member.id) === -1)
+        setCurrentGroup({
+            groupId: currentGroup.groupId,
+            title: currentGroup.title,            
+            members: newMembersList,
+            owner: currentGroup.owner
+        })
+        setNewMembersPageTrigger(!newMembersPageTrigger);
+    }
+
+    const checkForUsers = async() => {
+        const response = await api.get(`https://localhost:5001/api/users?userName=${newUserName}`);
+        
+        const users: UserForHome[] = response.data;
+        const filteredUsers = users.filter((user) => currentGroup.members.filter((groupMember: UserForHome) => groupMember.id === user.id).length === 0 && user.userName !== currentGroup.owner);
+
+        if(filteredUsers.length === 0){
+            setNoUserFoundErrorTrigger('No users found');
+            return;
+        }
+
+        const newUsers: UserForHomeSearch[] = filteredUsers.map((user: UserForHome) => {return {...user, checked: false}});        
+        setFoundUsers(newUsers);
+    }
+    const handleCheckBoxForMembers = ( member: UserForHomeSearch ) => {   
+        const newFoundMemberList = groupMembers.map((memberParam: UserForHomeSearch) => {
+            if(memberParam.id === member.id){
+                return {...memberParam, checked: !memberParam.checked}
+            }
+            return memberParam;
+        });
+        console.log(newFoundMemberList)
+        setGroupMembers(newFoundMemberList);
+        
+        const hasParamMember = selectedMembers.find((memberParam) => memberParam === member.id)
+        if(hasParamMember === undefined) {
+            setSelectedMembers((memberParam: string[]) => [...memberParam, member.id]);             
+        }else {
+            const newSelectedUserList = selectedMembers.filter((memberParam: string) => memberParam !== member.id)
+            setSelectedMembers(newSelectedUserList);
+        }
+    }
+
     const handleCheckBox = ( user: UserForHomeSearch ) => {   
         const newFoundUsersList = foundUsers.map((userParam: UserForHomeSearch) => {
             if(userParam.id === user.id){
@@ -79,19 +177,47 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
         
         const hasParamUser = selectedUsersList.find((userParam) => userParam.id === user.id)
         if(hasParamUser === undefined) {
-            
-            // const newSelectedUserList: UserForHome = [...selectedUsersList, user]
             setSelectedUsersList((userParam: UserForHome[]) => [...userParam, {
                 id: user.id,
                 userName: user.userName,
                 email: user.email
-            }]); 
-            // console.log(selectedUsersList)
+            }]);             
         }else {
             const newSelectedUserList = selectedUsersList.filter((userParam: UserForHome) => userParam.id !== user.id)
+            console.log(newSelectedUserList);
             setSelectedUsersList(newSelectedUserList);
         }
     }
+
+    const addUsersToGroup = async() => {
+        const formatedSelectedUsersList: {groupId: string, memberId: string}[] = [];
+        
+        for(var i = 0; i < selectedUsersList.length; i++){
+            formatedSelectedUsersList.push({
+                groupId: currentGroup.groupId,
+                memberId: selectedUsersList[i].id
+            })
+        }
+        if(formatedSelectedUsersList.length !== 0){
+            const response = await api.post('https://localhost:5001/api/groups/members', formatedSelectedUsersList);
+            
+            setCurrentGroup({
+                groupId: currentGroup.groupId,
+                title: currentGroup.title,            
+                members: response.data.members,
+                owner: currentGroup.owner
+            })
+            
+            setSelectedUsersList([]);
+            setFoundUsers([]);
+            setNewUserName('');
+            setIsNewMemberTriggered(!isNewMemberTriggered)
+        }
+    }
+
+    useEffect(() => {
+        getGroupSecrets()
+    },[])
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', marginTop: 10 }}>
@@ -100,11 +226,14 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
                         <img className='enter-group-secret' style={{ width: 40, height: 40 }} src={backToGroups} onClick={() => setIsGroupEntered(!isGroupEntered)} />
                         <p style={{ fontWeight: 'bolder', fontSize: 30, marginLeft: 20, paddingTop: 3 }}>{currentGroup.title}</p>
                     </div>
-                    <button className='delete-group-btn' type='submit' onClick={() => removeGroup()}>Delete Group</button>
+                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '60%'}}>
+                        <button className='manage-members-btn' type='submit' onClick={() => getGroupMembers()}>Manage Members</button>
+                        <button className='delete-group-btn' type='submit' onClick={() => removeGroup()}>Delete Group</button>
+                    </div>
                 </div>
                 <div style={{ justifyContent: 'space-between', alignItems: 'center' }} className='create-secret-conatiner'>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <img hidden={isNewSecretTriggered} className='create-secret-btn' src={isNewMemberTriggered ? closeCreate : createSign} onClick={() => setIsNewMemberTriggered(!isNewMemberTriggered)} />
+                        <img hidden={isNewSecretTriggered} className='create-secret-btn' src={isNewMemberTriggered ? closeCreate : createSign} onClick={() => {setIsNewMemberTriggered(!isNewMemberTriggered); setNewUserName('')}} />
                         <label hidden={isNewSecretTriggered} style={{ paddingLeft: 15 }}>Add Member</label>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', width: '70%' }}>
@@ -114,7 +243,7 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
                                 <>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <input hidden={!isNewMemberTriggered} className='create-secret-input' type='text' value={newUserName} onChange={(e) => {setNewUserName(e.target.value); setNoUserFoundErrorTrigger('')}} />
-                                        <img className='enter-group-secret' style={{ width: 35, height: 35, paddingLeft: 15 }} src={searchUser} onClick={() => setNoUserFoundErrorTrigger('No User Found!')} />
+                                        <img className='enter-group-secret' style={{ width: 35, height: 35, paddingLeft: 15 }} src={searchUser} onClick={() => checkForUsers()} />
                                     </div>        
                                 </>
                             :
@@ -131,47 +260,7 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
                 </div>
                 <div className='secrets-content-container'>
                     {      
-                        isNewSecretTriggered                        
-                        ? 
-                        <div style={{ backgroundColor: '#363636' }}>
-                            <div style={{ display:'flex', flexDirection: 'row' }} className='create-secret-conatiner'>
-                                <label hidden={!isNewSecretTriggered} style={{ fontSize:  18, marginTop: 20, marginBottom: 20 }}>Enter Secret Content</label>
-                                <input hidden={!isNewSecretTriggered}  className='create-secret-content-input' type='text' value={newSecretContent} onChange={(e) => setNewSecretContent(e.target.value)} />
-                            </div>
-                            <button className='submit-new-secret' type='submit' onClick={() => createSecret()}>Create Secret</button>
-                        </div> 
-                        : 
-                        isNewMemberTriggered                        
-                        ? 
-                        <div style={{ backgroundColor: '#363636' }}>
-                            <div style={{ display:'flex', flexDirection: 'column' }} className='create-secret-conatiner'>
-                                {
-                                    foundUsers.length === 0 && newUserName.length > 0
-                                    ?
-                                        <label>{noUserFoundErrorTrigger}</label>
-                                    :
-                                    foundUsers.map((user: UserForHomeSearch) => (
-                                        <div className='secrets-content' key={user.id}>
-                                            <p className='secrets-values'>{user.userName}</p>
-                                            <p className='secrets-values'>{user.email}</p>
-                                            <img className='delete-secret-btn' src={user.checked ? checkedBox : uncheckedBox} onClick={() => handleCheckBox(user)} />
-                                        </div>
-                                        )
-                                    )
-                                }
-                            </div>
-                            <button className='submit-new-secret' type='submit' onClick={() => console.log(selectedUsersList)}>Add User</button>
-                        </div> 
-                        :       
-                        currentGroup.secrets.map((secret: Secret) => (
-                            <div className='secrets-content' key={secret.id}>
-                                <p className='secrets-values'>{secret.title}</p>
-                                <p className='secrets-values'>{secret.content}</p>
-                                <p className='secrets-values'>{secret.dateCreated}</p>
-                                <img className='delete-secret-btn' src={deleteBtn} onClick={() => removeSecret(secret.id)} />
-                            </div>
-                            )
-                        )
+                        handleScreenChanges()
                     }
                 </div>                
             </div>

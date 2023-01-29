@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Page, SecretsPage } from '../data/globalVariables';
+import { api, Page, SecretsPage } from '../data/globalVariables';
 import { GroupSecretsData, Secret, UserForHome } from '../data/UserSecrets';
-import { secrets } from '../data/MockData/UserSecrets';
 import { groupSecretsData } from '../data/MockData/GroupSecrets';
 import settingsLogo from '../assets/settings-logo.svg';
 import MySecrets from './MySecrets';
 import GroupSecrets from './GroupSecrets';
 import '../Home.css'
 
-export default function Home ( { setScreen }: any ) {
+export default function Home ( { setScreen, loggedInUser, setLoggedInUser }: any ) {
     const [ isSettingsMenu , setIsSettingsMenu ] = useState<boolean>(false);
-    const [ userSecrets, setUserSecrets ] = useState<Secret[]>(secrets);
+    const [ userSecrets, setUserSecrets ] = useState<Secret[]>([]);
     const [ groupsList, setGroupsList ] = useState<GroupSecretsData[]>(groupSecretsData);
     const [ currentSecretsPage, setCurrentSecretsPage ] = useState<SecretsPage>(SecretsPage.MySecrets);
     const [ newSecret, setNewSecret ] = useState<Secret>();
@@ -26,7 +25,7 @@ export default function Home ( { setScreen }: any ) {
     return (
         <div>
             <div className='header-menu'>
-                <h1 style={{ fontWeight: 'bolder', fontSize: 40 }}>Welcome, Andrei</h1>
+                <h1 style={{ fontWeight: 'bolder', fontSize: 40 }}>Welcome, {loggedInUser.userName}</h1>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <img className='settings-menu' style={{ marginRight: 15 }} src={settingsLogo} width={50} height={50} onClick={() => setIsSettingsMenu(!isSettingsMenu)} />
                     <ul className='settings-menu' hidden={!isSettingsMenu}>
@@ -63,9 +62,9 @@ export default function Home ( { setScreen }: any ) {
             {
                 currentSecretsPage === SecretsPage.MySecrets
                     ?
-                    <MySecrets userSecrets={userSecrets} setUserSecrets={setUserSecrets} />
+                    <MySecrets loggedInUser={loggedInUser} userSecrets={userSecrets} setUserSecrets={setUserSecrets} />
                     :
-                    <GroupSecrets groupsList={groupsList} setGroupsList={setGroupsList} />
+                    <GroupSecrets loggedInUser={loggedInUser} groupsList={groupsList} setGroupsList={setGroupsList} />
             }
         
         </div>
