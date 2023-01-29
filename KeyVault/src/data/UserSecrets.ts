@@ -1,19 +1,26 @@
 export interface Secret {
-    id: number,
+    id: string,
     title: string,
     content: string,
     dateCreated: string
+    ownerId: string
+}
+
+export interface SecretForCreation {
+    title: string,
+    content: string,
+    ownerId: string
 }
 
 export interface User {
-    id: number,
+    id: string,
     userName: string,
     email: string,
     password: string,    
 }
 
 export interface UserForHome {
-    id: number,
+    id: string,
     userName: string,
     email: string
 }
@@ -25,31 +32,35 @@ export interface UserForCreation {
 }
 
 export interface UserForHomeSearch {
-    id: number,
+    id: string,
     userName: string,
     email: string,
     checked: boolean
 }
 
 export interface GroupSecretsData {
-    id: number,
+    groupId: string,
     title: string,
-    secrets: Secret[],
     members: UserForHome[],
     owner: string
 }
 
+export interface GroupSecretsDataForCreation {
+    groupId: string,
+    secret: SecretForCreation
+}
+
 export const emptySecret: Secret = {
-    id: 0,
+    id: '',
     title: '',
     content: '',
-    dateCreated: ''
+    dateCreated: '',
+    ownerId: ''
 }
 
 export const emptyGroup: GroupSecretsData = {
-    id: 0,
+    groupId: '',
     title: '',
-    secrets: [],
     members: [],
     owner: ''
 }

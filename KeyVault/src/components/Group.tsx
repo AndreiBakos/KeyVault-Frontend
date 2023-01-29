@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { GroupSecretsData, Secret, UserForHome, UserForHomeSearch } from '../data/UserSecrets';
+import { emptySecret, GroupSecretsData, GroupSecretsDataForCreation, Secret, SecretForCreation, UserForHome, UserForHomeSearch } from '../data/UserSecrets';
 import createSign from '../assets/create-sign.svg';
 import closeCreate from '../assets/close-create.svg';
 import enterGroupSecret from '../assets/acces-group-secret.svg';
@@ -17,11 +17,12 @@ interface GroupProps {
     groupsList: GroupSecretsData[],
     setGroupsList: Dispatch<SetStateAction<GroupSecretsData[]>>,
     isGroupEntered: SetStateAction<boolean>,
-    setIsGroupEntered: Dispatch<SetStateAction<boolean>>
+    setIsGroupEntered: Dispatch<SetStateAction<boolean>>,
+    loggedInUser: any
 }
 
 
-export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsList, isGroupEntered, setIsGroupEntered }: GroupProps ) {
+export default function( { loggedInUser, currentGroup, setCurrentGroup, groupsList, setGroupsList, isGroupEntered, setIsGroupEntered }: GroupProps ) {
     const [ isNewSecretTriggered, setIsNewSecretTriggered ] = useState<boolean>(false);
     const [ newSecretTitle, setNewSecretTitle ] = useState<string>('');
     const [ newSecretContent, setNewSecretContent ] = useState<string>('');
@@ -30,53 +31,57 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
     const [ newUserName, setNewUserName ] = useState<string>('');
     const [ noUserFoundErrorTrigger, setNoUserFoundErrorTrigger ] = useState<string>('');
     const [ selectedUsersList, setSelectedUsersList ] = useState<UserForHome[]>([]);
+    const [ groupSecrets, setGroupSecrets ] = useState<Secret[]>([]);
 
-    const createSecret = () => {        
-        //make Api call here
+    const getGroupSecrets = async() => {
+        const secrets:Secret[] = await (await api.get(`https://localhost:5001/api/groups/secrets?groupId=${currentGroup.groupId}`)).data;
+        setGroupSecrets(secrets);
+    }
 
-        const newGroupSecret: Secret = {
-            id: 3,
-            title: newSecretTitle,
-            content: newSecretContent,
-            dateCreated: '24/12/2023'
+    const createSecret = async () => {        
+        const newGroupSecret: GroupSecretsDataForCreation = {
+            groupId: currentGroup.groupId,
+            secret: {
+                title: newSecretTitle,
+                content: newSecretContent,
+                ownerId: loggedInUser.id
+            }
         }
-        const newGroup: GroupSecretsData = {
-            id: currentGroup.id,
-            title: currentGroup.title,
-            secrets: [newGroupSecret, ...currentGroup.secrets],
-            members: currentGroup.members,
-            owner: currentGroup.owner
-        }
+        
+        const response: Secret = await (await api.post('https://localhost:5001/api/groups/secrets', newGroupSecret)).data
+        setGroupSecrets((groupSecrets) => [...groupSecrets, response]);
         setNewSecretTitle('');
         setNewSecretContent('');
-        setCurrentGroup(newGroup);
         setIsNewSecretTriggered(!isNewSecretTriggered);
     }
 
-    const removeGroup = () => {
-        const newGroupsList = groupsList.filter((group: GroupSecretsData) => group.id !== currentGroup.id);
+    const removeGroup = async() => {
+        await api.delete(`https://localhost:5001/api/groups?groupId=${currentGroup.groupId}`);
+
+        const newGroupsList = groupsList.filter((group: GroupSecretsData) => group.groupId !== currentGroup.groupId);
         setGroupsList(newGroupsList);
         setIsGroupEntered(!isGroupEntered)
     }
 
-    const removeSecret = (secretId: number) => {
-        const newGroup: GroupSecretsData = {
-            id: currentGroup.id,
-            title: currentGroup.title,
-            secrets: currentGroup.secrets.filter((secret: Secret) => secret.id !== secretId),
-            members: currentGroup.members,
-            owner: currentGroup.owner
-        }
-        setCurrentGroup(newGroup);
+    const removeSecret = async(secretId: string) => {
+        await api.delete(`https://localhost:5001/api/groups/secrets?secretId=${secretId}`);
+
+        const newGroupSecrets = groupSecrets.filter((groupSecrets: Secret) => groupSecrets.id !== secretId);
+        setGroupSecrets(newGroupSecrets);
     }
 
     const checkForUsers = async() => {
-
         const response = await api.get(`https://localhost:5001/api/users?userName=${newUserName}`);
-
+        
         const users: UserForHome[] = response.data;
-        const filteredUsers = users.filter((user) => currentGroup.members.indexOf(user) === -1 && user.userName !== currentGroup.owner);
-        const newUsers: UserForHomeSearch[] = filteredUsers.map((user: UserForHome) => {return {...user, checked: false}});
+        const filteredUsers = users.filter((user) => currentGroup.members.filter((groupMember: UserForHome) => groupMember.id === user.id).length === 0 && user.userName !== currentGroup.owner);
+
+        if(filteredUsers.length === 0){
+            setNoUserFoundErrorTrigger('No users found');
+            return;
+        }
+
+        const newUsers: UserForHomeSearch[] = filteredUsers.map((user: UserForHome) => {return {...user, checked: false}});        
         setFoundUsers(newUsers);
     }
 
@@ -103,15 +108,34 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
     }
 
     const addUsersToGroup = async() => {
-        console.log(selectedUsersList);
-        setCurrentGroup({
-            id: currentGroup.id,
-            title: currentGroup.title,
-            secrets: currentGroup.secrets,
-            members: [...currentGroup.members, selectedUsersList],
-            owner: currentGroup.owner
-        })
+        const formatedSelectedUsersList: {groupId: string, memberId: string}[] = [];
+        
+        for(var i = 0; i < selectedUsersList.length; i++){
+            formatedSelectedUsersList.push({
+                groupId: currentGroup.groupId,
+                memberId: selectedUsersList[i].id
+            })
+        }
+        if(formatedSelectedUsersList.length !== 0){
+            const response = await api.post('https://localhost:5001/api/groups/members', formatedSelectedUsersList);
+            
+            setCurrentGroup({
+                groupId: currentGroup.groupId,
+                title: currentGroup.title,            
+                members: response.data.members,
+                owner: currentGroup.owner
+            })
+            
+            setSelectedUsersList([]);
+            setFoundUsers([]);
+            setNewUserName('');
+            setIsNewMemberTriggered(!isNewMemberTriggered)
+        }
     }
+
+    useEffect(() => {
+        getGroupSecrets()
+    },[])
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', marginTop: 10 }}>
@@ -124,7 +148,7 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
                 </div>
                 <div style={{ justifyContent: 'space-between', alignItems: 'center' }} className='create-secret-conatiner'>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <img hidden={isNewSecretTriggered} className='create-secret-btn' src={isNewMemberTriggered ? closeCreate : createSign} onClick={() => setIsNewMemberTriggered(!isNewMemberTriggered)} />
+                        <img hidden={isNewSecretTriggered} className='create-secret-btn' src={isNewMemberTriggered ? closeCreate : createSign} onClick={() => {setIsNewMemberTriggered(!isNewMemberTriggered); setNewUserName('')}} />
                         <label hidden={isNewSecretTriggered} style={{ paddingLeft: 15 }}>Add Member</label>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', width: '70%' }}>
@@ -183,7 +207,7 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
                             <button className='submit-new-secret' type='submit' onClick={() => addUsersToGroup()}>Add User</button>
                         </div> 
                         :       
-                        currentGroup.secrets.map((secret: Secret) => (
+                        groupSecrets.map((secret: Secret) => (
                             <div className='secrets-content' key={secret.id}>
                                 <p className='secrets-values'>{secret.title}</p>
                                 <p className='secrets-values'>{secret.content}</p>
