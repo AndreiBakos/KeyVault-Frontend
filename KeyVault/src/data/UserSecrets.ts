@@ -1,5 +1,5 @@
 export interface Secret {
-    id: string,
+    secretId: string,
     title: string,
     content: string,
     dateCreated: string
@@ -51,7 +51,7 @@ export interface GroupSecretsDataForCreation {
 }
 
 export const emptySecret: Secret = {
-    id: '',
+    secretId: '',
     title: '',
     content: '',
     dateCreated: '',

@@ -116,7 +116,7 @@ export default function( { loggedInUser, currentGroup, setCurrentGroup, groupsLi
     const removeSecret = async(secretId: string) => {
         await api.delete(`https://localhost:5001/api/groups/secrets?secretId=${secretId}`);
 
-        const newGroupSecrets = groupSecrets.filter((groupSecrets: Secret) => groupSecrets.id !== secretId);
+        const newGroupSecrets = groupSecrets.filter((groupSecrets: Secret) => groupSecrets.secretId !== secretId);
         setGroupSecrets(newGroupSecrets);
     }
 
@@ -154,7 +154,6 @@ export default function( { loggedInUser, currentGroup, setCurrentGroup, groupsLi
             }
             return memberParam;
         });
-        console.log(newFoundMemberList)
         setGroupMembers(newFoundMemberList);
         
         const hasParamMember = selectedMembers.find((memberParam) => memberParam === member.id)
@@ -184,7 +183,6 @@ export default function( { loggedInUser, currentGroup, setCurrentGroup, groupsLi
             }]);             
         }else {
             const newSelectedUserList = selectedUsersList.filter((userParam: UserForHome) => userParam.id !== user.id)
-            console.log(newSelectedUserList);
             setSelectedUsersList(newSelectedUserList);
         }
     }

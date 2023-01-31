@@ -7,11 +7,11 @@ export default function Secrets ({ groupSecrets, removeSecret }: any){
         <>
             {
                 groupSecrets.map((secret: Secret) => (
-                    <div className='secrets-content' key={secret.id}>
+                    <div className='secrets-content' key={secret.secretId}>
                         <p className='secrets-values'>{secret.title}</p>
                         <p className='secrets-values'>{secret.content}</p>
                         <p className='secrets-values'>{secret.dateCreated}</p>
-                        <img className='delete-secret-btn' src={deleteBtn} onClick={() => removeSecret(secret.id)} />
+                        <img className='delete-secret-btn' src={deleteBtn} onClick={() => removeSecret(secret.secretId)} />
                     </div>
                     )
                 )

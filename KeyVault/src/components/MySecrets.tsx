@@ -20,16 +20,16 @@ export default function MySecrets( { loggedInUser, userSecrets, setUserSecrets }
             ownerId: loggedInUser.id
         }
 
-        await api.post('https://localhost:5001/api/secrets', newUserSecret);
-        setUserSecrets((secrets: Secret[]) => [...secrets, newUserSecret]);
+        const newSecret = await (await api.post('https://localhost:5001/api/secrets', newUserSecret)).data;
+        setUserSecrets((secrets: Secret[]) => [...secrets, newSecret]);
         setNewSecretTitle('');
         setNewSecretContent('');
         setIsNewSecretTriggered(!isNewSecretTriggered);
     }
 
     const removeSecret = async (secretId: string) => {
-        const newSecretsList = userSecrets.filter((secret: Secret) => secret.id !== secretId);
-        await api.delete(`https://localhost:5001/api/secrets?secretId=${secretId}`);
+        const newSecretsList = userSecrets.filter((secret: Secret) => secret.secretId !== secretId);
+        const request = await api.delete(`https://localhost:5001/api/secrets?secretId=${secretId}`);
         setUserSecrets(newSecretsList);
     }
 
@@ -62,11 +62,11 @@ export default function MySecrets( { loggedInUser, userSecrets, setUserSecrets }
                     :
                     <div className='secrets-content-container'>
                         {userSecrets.map((secret: Secret) => (
-                            <div className='secrets-content' key={secret.id}>
+                            <div className='secrets-content' key={secret.secretId}>
                                 <p className='secrets-values'>{secret.title}</p>
                                 <p className='secrets-values'>{secret.content}</p>
                                 <p className='secrets-values'>{secret.dateCreated}</p>
-                                <img className='delete-secret-btn' src={deleteBtn} onClick={() => removeSecret(secret.id)} />
+                                <img className='delete-secret-btn' src={deleteBtn} onClick={() => removeSecret(secret.secretId)} />
                             </div>
                                 )
                             )
