@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
-import { api, Page, SecretsPage } from '../data/globalVariables';
+import { api } from '../data/globalVariables';
 import { emptyGroup, GroupSecretsData, UserForHome } from '../data/UserSecrets';
-import { groupSecretsData } from '../data/MockData/GroupSecrets';
 import createSign from '../assets/create-sign.svg';
 import closeCreate from '../assets/close-create.svg';
 import enterGroupSecret from '../assets/acces-group-secret.svg';
-import backToGroups from '../assets/back-to-groups.svg';
 import SubmitGroupName from '../assets/check-logo.svg';
 import '../Home.css'
 import Group from './Group';
@@ -31,12 +29,12 @@ export default function GroupSecrets( { loggedInUser, groupsList, setGroupsList 
         setGroupsList((groups: GroupSecretsData[]) => [newGroup, ...groups]);
         setNewGroupTitle('');
         setIsNewSecretTriggered(!isNewSecretTriggered);
-
+        
     }
-
+    
     const getGroups = async() => {
         const groups = await api.get(`https://localhost:5001/api/groups?userId=${loggedInUser.id}`);
-        setGroupsList(groups.data);
+        setGroupsList(groups.data);        
     }
 
     useEffect(() => {
@@ -60,10 +58,10 @@ export default function GroupSecrets( { loggedInUser, groupsList, setGroupsList 
                 </div>
                 <div className='secrets-content-container'>
                     {
-                        groupsList.map((group: GroupSecretsData) => (
+                        groupsList.map((group: GroupSecretsData, index: number) => (
                             <div className='group-secrets-content' key={group.groupId}>
                                 <p className='secrets-values'>{group.title}</p>
-                                <p className='secrets-values'>Owner: {group.members[0].userName}</p>                            
+                                <p className='secrets-values'>Owner: {group.members.filter((m: UserForHome) => m.id === group.ownerId)[0]?.userName}</p>                                                    
                                 <div style={{ display: 'flex', alignItems: 'center', paddingRight: 20 }}>                                    
                                     <p style={{ fontWeight: 'bolder', marginRight: 12 }}>{ group.members.length <= 1 ? 'No other members': 'Members:'}</p>
                                     {                        

@@ -3,7 +3,7 @@ import { api, Page } from '../../data/globalVariables';
 import { ValidateEmail } from '../../Utils/ValidateData';
 import showPassword  from '../../assets/show-password.svg';
 import hidePassword from '../../assets/hide-password.svg';
-import axios from 'axios';
+import { SHA256 } from 'crypto-js';
 
 export default function LogIn( { setScreen, loggedInUser, setLoggedInUser }: any ) {
     const [email, setEmail] = useState<string>('');
@@ -31,7 +31,8 @@ export default function LogIn( { setScreen, loggedInUser, setLoggedInUser }: any
         const token = response.data.jwt;
         localStorage.setItem('token', token);
 
-        const userResponse = await axios.get(`https://localhost:5001/api/users/login?email=${email}&password=${password}`, {headers: {'Authorization': `Bearer ${token}`}});
+        const hashedPassword = SHA256(password).toString();
+        const userResponse = await api.get(`https://localhost:5001/api/users/login?email=${email}&password=${hashedPassword}`);
         if(userResponse.status === 204){
             alert('Invalid credentials');
             return
@@ -43,7 +44,7 @@ export default function LogIn( { setScreen, loggedInUser, setLoggedInUser }: any
 
     return (
         <div className="App" style={{ display: 'grid', placeItems: 'center', height: screen.height / 1.6}}>
-            <h1 className='header-text'>Welcome to Key Vault!</h1>
+            <h1 className='header-text'>Welcome to KeyVault!</h1>
             <div className='form-container' style={{ width: screen.width / 2.5 }}>
                 <div className='form-group'>
                     <label> Email:</label>

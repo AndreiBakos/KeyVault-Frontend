@@ -42,7 +42,7 @@ export interface GroupSecretsData {
     groupId: string,
     title: string,
     members: UserForHome[],
-    owner: string
+    ownerId: string
 }
 
 export interface GroupSecretsDataForCreation {
@@ -62,5 +62,5 @@ export const emptyGroup: GroupSecretsData = {
     groupId: '',
     title: '',
     members: [],
-    owner: ''
+    ownerId: ''
 }

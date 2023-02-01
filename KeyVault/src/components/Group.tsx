@@ -10,7 +10,6 @@ import NewSecretsScreen from './GroupComponents/NewSecretsScreen';
 import Secrets from './GroupComponents/Secrets';
 import '../Home.css'
 import GroupMembers from './GroupComponents/GroupMembers';
-import axios from 'axios';
 
 interface GroupProps {
     currentGroup: GroupSecretsData,
@@ -60,7 +59,9 @@ export default function( { loggedInUser, currentGroup, setCurrentGroup, groupsLi
         }
 
         if(newMembersPageTrigger){
-            return <GroupMembers 
+            return <GroupMembers
+                loggedInUser={loggedInUser}
+                currentGroup={currentGroup}
                 selectedMembers={selectedMembers}
                 groupMembers={groupMembers}
                 handleCheckBoxForMembers={handleCheckBoxForMembers}
@@ -120,7 +121,7 @@ export default function( { loggedInUser, currentGroup, setCurrentGroup, groupsLi
         setGroupSecrets(newGroupSecrets);
     }
 
-    const removeMembers = async() => {        
+    const removeMembers = async() => { 
         await api.delete(`https://localhost:5001/api/groups/members?ids=${selectedMembers}`);
 
         const newMembersList = currentGroup.members.filter((member) => selectedMembers.indexOf(member.id) === -1)
@@ -128,7 +129,7 @@ export default function( { loggedInUser, currentGroup, setCurrentGroup, groupsLi
             groupId: currentGroup.groupId,
             title: currentGroup.title,            
             members: newMembersList,
-            owner: currentGroup.owner
+            ownerId: currentGroup.ownerId
         })
         setNewMembersPageTrigger(!newMembersPageTrigger);
     }
@@ -137,7 +138,7 @@ export default function( { loggedInUser, currentGroup, setCurrentGroup, groupsLi
         const response = await api.get(`https://localhost:5001/api/users?userName=${newUserName}`);
         
         const users: UserForHome[] = response.data;
-        const filteredUsers = users.filter((user) => currentGroup.members.filter((groupMember: UserForHome) => groupMember.id === user.id).length === 0 && user.userName !== currentGroup.owner);
+        const filteredUsers = users.filter((user) => currentGroup.members.filter((groupMember: UserForHome) => groupMember.id === user.id).length === 0 && user.userName !== currentGroup.ownerId);
 
         if(filteredUsers.length === 0){
             setNoUserFoundErrorTrigger('No users found');
@@ -160,8 +161,8 @@ export default function( { loggedInUser, currentGroup, setCurrentGroup, groupsLi
         if(hasParamMember === undefined) {
             setSelectedMembers((memberParam: string[]) => [...memberParam, member.id]);             
         }else {
-            const newSelectedUserList = selectedMembers.filter((memberParam: string) => memberParam !== member.id)
-            setSelectedMembers(newSelectedUserList);
+            const newSelectedMemberList = selectedMembers.filter((memberParam: string) => memberParam !== member.id)
+            setSelectedMembers(newSelectedMemberList);
         }
     }
 
@@ -198,12 +199,11 @@ export default function( { loggedInUser, currentGroup, setCurrentGroup, groupsLi
         }
         if(formatedSelectedUsersList.length !== 0){
             const response = await api.post('https://localhost:5001/api/groups/members', formatedSelectedUsersList);
-            
             setCurrentGroup({
                 groupId: currentGroup.groupId,
                 title: currentGroup.title,            
-                members: response.data.members,
-                owner: currentGroup.owner
+                members: response.data,
+                ownerId: currentGroup.ownerId
             })
             
             setSelectedUsersList([]);
@@ -226,7 +226,10 @@ export default function( { loggedInUser, currentGroup, setCurrentGroup, groupsLi
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '60%'}}>
                         <button className='manage-members-btn' type='submit' onClick={() => getGroupMembers()}>Manage Members</button>
-                        <button className='delete-group-btn' type='submit' onClick={() => removeGroup()}>Delete Group</button>
+                        {
+                            currentGroup.ownerId === loggedInUser.id &&
+                            <button className='delete-group-btn' type='submit' onClick={() => removeGroup()}>Delete Group</button>
+                        }
                     </div>
                 </div>
                 <div style={{ justifyContent: 'space-between', alignItems: 'center' }} className='create-secret-conatiner'>

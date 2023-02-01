@@ -57,7 +57,7 @@ export default function MySecrets( { loggedInUser, userSecrets, setUserSecrets }
                             <label hidden={!isNewSecretTriggered} style={{ fontSize:  18, marginTop: 20, marginBottom: 20 }}>Enter Secret Content</label>
                             <input hidden={!isNewSecretTriggered}  className='create-secret-content-input' type='text' value={newSecretDescription} onChange={(e) => setNewSecretContent(e.target.value)} />
                         </div>
-                            <button className='submit-new-secret' type='submit' onClick={() => createSecret()}>Create Secret</button>
+                            <button disabled={newSecretTitle.length === 0 || newSecretDescription.length === 0} className='submit-new-secret' type='submit' onClick={() => createSecret()}>Create Secret</button>
                     </div> 
                     :
                     <div className='secrets-content-container'>

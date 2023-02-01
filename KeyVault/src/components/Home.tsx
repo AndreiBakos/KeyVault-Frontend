@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
-import { api, Page, SecretsPage } from '../data/globalVariables';
-import { GroupSecretsData, Secret, UserForHome } from '../data/UserSecrets';
-import { groupSecretsData } from '../data/MockData/GroupSecrets';
+import { useState } from 'react';
+import { Page, SecretsPage } from '../data/globalVariables';
+import { GroupSecretsData, Secret } from '../data/UserSecrets';
 import settingsLogo from '../assets/settings-logo.svg';
 import MySecrets from './MySecrets';
 import GroupSecrets from './GroupSecrets';
@@ -10,7 +9,7 @@ import '../Home.css'
 export default function Home ( { setScreen, loggedInUser, setLoggedInUser }: any ) {
     const [ isSettingsMenu , setIsSettingsMenu ] = useState<boolean>(false);
     const [ userSecrets, setUserSecrets ] = useState<Secret[]>([]);
-    const [ groupsList, setGroupsList ] = useState<GroupSecretsData[]>(groupSecretsData);
+    const [ groupsList, setGroupsList ] = useState<GroupSecretsData[]>([]);
     const [ currentSecretsPage, setCurrentSecretsPage ] = useState<SecretsPage>(SecretsPage.MySecrets);
     const [ newSecret, setNewSecret ] = useState<Secret>();
 
@@ -29,7 +28,6 @@ export default function Home ( { setScreen, loggedInUser, setLoggedInUser }: any
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <img className='settings-menu' style={{ marginRight: 15 }} src={settingsLogo} width={50} height={50} onClick={() => setIsSettingsMenu(!isSettingsMenu)} />
                     <ul className='settings-menu' hidden={!isSettingsMenu}>
-                        <li className='settings-menu' style={{ marginBottom: 20 }}>Profile</li>
                         <li className='settings-menu' style={{ color: '#c23030' }} onClick={() => setScreen(Page.LogIn)}>Log Out</li>
                     </ul>
                 </div>

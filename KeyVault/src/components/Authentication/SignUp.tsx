@@ -3,13 +3,13 @@ import { api, Page } from '../../data/globalVariables';
 import { ValidateEmail } from '../../Utils/ValidateData';
 import showPassword  from '../../assets/show-password.svg';
 import hidePassword from '../../assets/hide-password.svg';
-import axios from 'axios';
+import { SHA256 } from 'crypto-js';
 
 export default function SignUp( { setScreen, loggedInUser, setLoggedInUser  }: any ) {
     const [userName, setUserName] = useState<string>('');
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [ isHidden, setIsHidden ] = useState<boolean>(false);
+    const [ isHidden, setIsHidden ] = useState<boolean>(true);
 
     const handleSubmit = async() => {
         if(email.length == 0 || password.length === 0 || userName .length === 0) {
@@ -35,22 +35,25 @@ export default function SignUp( { setScreen, loggedInUser, setLoggedInUser  }: a
         var newUser = {
             userName: userName,
             email: email,
-            password: password
+            password: SHA256(password).toString()
         }
         //Fetch Data here:
         const response = await api.get('/crypto')
         const token = response.data.jwt;
 
         localStorage.setItem('token', token);
-
-        const userResponse = await axios.post(`https://localhost:5001/api/users/create`, newUser, {headers: {'Authorization': `Bearer ${token}`}});
-        if(userResponse.status === 204){
-            alert('Invalid credentials');
-            return
+        try {
+            const userResponse = await api.post(`https://localhost:5001/api/users/create`, newUser);
+            if(userResponse.status === 204){
+                alert('Invalid credentials');
+                return
+            }
+            const user = userResponse.data;
+            setLoggedInUser(user);
+            setScreen(Page.Home);
+        } catch (error) {
+            alert("User already exists");
         }
-        const user = userResponse.data;
-        setLoggedInUser(user);
-        setScreen(Page.Home);
     }
 
     return (
