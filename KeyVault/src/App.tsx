@@ -1,25 +1,34 @@
-import { useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import './App.css'
 import LogIn from './components/Authentication/LogIn'
 import SignUp from './components/Authentication/SignUp';
 import Home from './components/Home';
 import { Page } from './data/globalVariables';
 import { UserForHome } from './data/UserSecrets';
+import { ContextComponentProvider, ContextComponent } from './Context';
+import { useNavigate } from 'react-router-dom';
 
 function App() {  
-  const [ screen, setScreen ] = useState<Page>();
-  const [ loggedInUser, setLoggedInUser ] = useState<UserForHome>();
+  const contextComponent = useContext(ContextComponent);
+  const navigate = useNavigate();
+  const CheckForUser = () => {
+    const user = localStorage.getItem('loggedInUser');
+    if(user !== null) {
+      const data = JSON.parse(user);
+      contextComponent?.setLoggedInUser(data);
+      navigate('/home');
 
-  const renderScreen = (account: Page | undefined) => {
-    switch(account){
-      case Page.LogIn: return (<LogIn setScreen={setScreen} setLoggedInUser={setLoggedInUser} />)
-      case Page.SignUp: return (<SignUp setScreen={setScreen} setLoggedInUser={setLoggedInUser} />)
-      case Page.Home: return (<Home setScreen={setScreen} loggedInUser={loggedInUser} setLoggedInUser={setLoggedInUser} />)
-      default: return (<LogIn setScreen={setScreen} setLoggedInUser={setLoggedInUser} />)
+    }else{
+      navigate('/login');
     }
   }
-
-    return (renderScreen(screen))
+useEffect(() => {
+  CheckForUser();
+})
+    return (
+      <>      
+      </>
+    )
 }
 
 export default App

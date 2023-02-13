@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { api } from '../data/globalVariables';
 import { emptyGroup, GroupSecretsData, UserForHome } from '../data/UserSecrets';
 import createSign from '../assets/create-sign.svg';
@@ -7,8 +7,10 @@ import enterGroupSecret from '../assets/acces-group-secret.svg';
 import SubmitGroupName from '../assets/check-logo.svg';
 import '../Home.css'
 import Group from './Group';
+import { ContextComponent } from '../Context';
 
 export default function GroupSecrets( { loggedInUser, groupsList, setGroupsList }: any ) {
+    const contextComponent = useContext(ContextComponent);
     const [ isNewSecretTriggered, setIsNewSecretTriggered ] = useState<boolean>(false);
     const [ isGroupEntered, setIsGroupEntered ] = useState<boolean>(false);
     const [ currentGroup, setCurrentGroup ] = useState<GroupSecretsData>(emptyGroup);
@@ -22,7 +24,7 @@ export default function GroupSecrets( { loggedInUser, groupsList, setGroupsList 
     const createNewGroup = async() => {
         const response = await api.post('https://localhost:5001/api/groups', {
             title: newGroupTitle,
-            ownerId: loggedInUser.id
+            ownerId: contextComponent?.loggedInUser?.id
         })
 
         const newGroup: GroupSecretsData = response.data;
@@ -33,7 +35,7 @@ export default function GroupSecrets( { loggedInUser, groupsList, setGroupsList 
     }
     
     const getGroups = async() => {
-        const groups = await api.get(`https://localhost:5001/api/groups?userId=${loggedInUser.id}`);
+        const groups = await api.get(`https://localhost:5001/api/groups?userId=${contextComponent?.loggedInUser?.id}`);
         setGroupsList(groups.data);        
     }
 
@@ -43,7 +45,7 @@ export default function GroupSecrets( { loggedInUser, groupsList, setGroupsList 
 
     if(isGroupEntered){
         return(
-            <Group loggedInUser={loggedInUser} currentGroup={currentGroup} setCurrentGroup={setCurrentGroup} groupsList={groupsList} setGroupsList={setGroupsList} isGroupEntered={isGroupEntered} setIsGroupEntered={setIsGroupEntered} />
+            <Group currentGroup={currentGroup} setCurrentGroup={setCurrentGroup} groupsList={groupsList} setGroupsList={setGroupsList} isGroupEntered={isGroupEntered} setIsGroupEntered={setIsGroupEntered} />
         )
     }else{
         return (

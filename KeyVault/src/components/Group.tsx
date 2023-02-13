@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react';
 import { GroupSecretsData, GroupSecretsDataForCreation, Secret, UserForHome, UserForHomeSearch } from '../data/UserSecrets';
 import { api } from '../data/globalVariables';
 import createSign from '../assets/create-sign.svg';
@@ -10,6 +10,7 @@ import NewSecretsScreen from './GroupComponents/NewSecretsScreen';
 import Secrets from './GroupComponents/Secrets';
 import '../Home.css'
 import GroupMembers from './GroupComponents/GroupMembers';
+import { ContextComponent } from '../Context';
 
 interface GroupProps {
     currentGroup: GroupSecretsData,
@@ -18,11 +19,11 @@ interface GroupProps {
     setGroupsList: Dispatch<SetStateAction<GroupSecretsData[]>>,
     isGroupEntered: SetStateAction<boolean>,
     setIsGroupEntered: Dispatch<SetStateAction<boolean>>,
-    loggedInUser: any
 }
 
 
-export default function( { loggedInUser, currentGroup, setCurrentGroup, groupsList, setGroupsList, isGroupEntered, setIsGroupEntered }: GroupProps ) {
+export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsList, isGroupEntered, setIsGroupEntered }: GroupProps ) {
+    const contextComponent = useContext(ContextComponent);
     const [ isNewSecretTriggered, setIsNewSecretTriggered ] = useState<boolean>(false);
     const [ newSecretTitle, setNewSecretTitle ] = useState<string>('');
     const [ newSecretContent, setNewSecretContent ] = useState<string>('');
@@ -59,8 +60,7 @@ export default function( { loggedInUser, currentGroup, setCurrentGroup, groupsLi
         }
 
         if(newMembersPageTrigger){
-            return <GroupMembers
-                loggedInUser={loggedInUser}
+            return <GroupMembers            
                 currentGroup={currentGroup}
                 selectedMembers={selectedMembers}
                 groupMembers={groupMembers}
@@ -95,7 +95,7 @@ export default function( { loggedInUser, currentGroup, setCurrentGroup, groupsLi
             secret: {
                 title: newSecretTitle,
                 content: newSecretContent,
-                ownerId: loggedInUser.id
+                ownerId: `${contextComponent?.loggedInUser?.id}`
             }
         }
         
@@ -227,7 +227,7 @@ export default function( { loggedInUser, currentGroup, setCurrentGroup, groupsLi
                     <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '60%'}}>
                         <button className='manage-members-btn' type='submit' onClick={() => getGroupMembers()}>Manage Members</button>
                         {
-                            currentGroup.ownerId === loggedInUser.id &&
+                            currentGroup.ownerId === contextComponent?.loggedInUser?.id &&
                             <button className='delete-group-btn' type='submit' onClick={() => removeGroup()}>Delete Group</button>
                         }
                     </div>

@@ -1,17 +1,38 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Page, SecretsPage } from '../data/globalVariables';
-import { GroupSecretsData, Secret } from '../data/UserSecrets';
+import { GroupSecretsData, Secret, UserForHome } from '../data/UserSecrets';
 import settingsLogo from '../assets/settings-logo.svg';
 import MySecrets from './MySecrets';
 import GroupSecrets from './GroupSecrets';
 import '../Home.css'
+import { ContextComponent } from '../Context';
+import { useNavigate } from 'react-router-dom';
 
-export default function Home ( { setScreen, loggedInUser, setLoggedInUser }: any ) {
+export default function Home () {
+    const navigate = useNavigate();
+    const contextComponent = useContext(ContextComponent);    
     const [ isSettingsMenu , setIsSettingsMenu ] = useState<boolean>(false);
     const [ userSecrets, setUserSecrets ] = useState<Secret[]>([]);
     const [ groupsList, setGroupsList ] = useState<GroupSecretsData[]>([]);
     const [ currentSecretsPage, setCurrentSecretsPage ] = useState<SecretsPage>(SecretsPage.MySecrets);
     const [ newSecret, setNewSecret ] = useState<Secret>();
+
+    const CheckIfUserExists = () => {
+        const user = localStorage.getItem('loggedInUser');
+        if(user !== null){
+            const data = JSON.parse(user);
+            contextComponent?.setLoggedInUser(data);
+        }else{
+            navigate('/');
+        }
+    }
+
+    const Logout = () => {
+        contextComponent?.setLoggedInUser(null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('loggedInUser');
+        navigate('/');
+    }
 
     const setCurentSecretsPage = async (page: number) => {
         if(page === SecretsPage.MySecrets) {
@@ -21,14 +42,17 @@ export default function Home ( { setScreen, loggedInUser, setLoggedInUser }: any
         }
     }
 
+    useEffect(() => {
+        CheckIfUserExists()
+    },[])
     return (
         <div>
             <div className='header-menu'>
-                <h1 style={{ fontWeight: 'bolder', fontSize: 40 }}>Welcome, {loggedInUser.userName}</h1>
+                <h1 style={{ fontWeight: 'bolder', fontSize: 40 }}>Welcome, {contextComponent?.loggedInUser?.userName}</h1>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <img className='settings-menu' style={{ marginRight: 15 }} src={settingsLogo} width={50} height={50} onClick={() => setIsSettingsMenu(!isSettingsMenu)} />
                     <ul className='settings-menu' hidden={!isSettingsMenu}>
-                        <li className='settings-menu' style={{ color: '#c23030' }} onClick={() => setScreen(Page.LogIn)}>Log Out</li>
+                        <li className='settings-menu' style={{ color: '#c23030' }} onClick={() => Logout()}>Log Out</li>
                     </ul>
                 </div>
             </div>            
@@ -58,11 +82,12 @@ export default function Home ( { setScreen, loggedInUser, setLoggedInUser }: any
                     className='secrets-container-header'>Group Secrets</p>
             </div>    
             {
+                contextComponent?.loggedInUser &&
                 currentSecretsPage === SecretsPage.MySecrets
                     ?
-                    <MySecrets loggedInUser={loggedInUser} userSecrets={userSecrets} setUserSecrets={setUserSecrets} />
+                    <MySecrets userSecrets={userSecrets} setUserSecrets={setUserSecrets} />
                     :
-                    <GroupSecrets loggedInUser={loggedInUser} groupsList={groupsList} setGroupsList={setGroupsList} />
+                    <GroupSecrets groupsList={groupsList} setGroupsList={setGroupsList} />
             }
         
         </div>

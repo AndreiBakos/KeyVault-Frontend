@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { api } from '../data/globalVariables';
 import {  Secret, SecretForCreation } from '../data/UserSecrets';
 import createSign from '../assets/create-sign.svg';
 import closeCreate from '../assets/close-create.svg';
 import deleteBtn from '../assets/delete-icon.svg';
 import '../Home.css'
+import { ContextComponent } from '../Context';
 
-export default function MySecrets( { loggedInUser, userSecrets, setUserSecrets }: any ) {
+export default function MySecrets( { userSecrets, setUserSecrets }: any ) {
+    const contextComponent = useContext(ContextComponent);
     const [ isNewSecretTriggered, setIsNewSecretTriggered ] = useState<boolean>(false);
     const [ newSecretTitle, setNewSecretTitle ] = useState<string>('');
     const [ newSecretDescription, setNewSecretContent ] = useState<string>('');
@@ -17,7 +19,7 @@ export default function MySecrets( { loggedInUser, userSecrets, setUserSecrets }
         const newUserSecret: SecretForCreation = {
             title: newSecretTitle,
             content: newSecretDescription,
-            ownerId: loggedInUser.id
+            ownerId: `${contextComponent?.loggedInUser?.id}`
         }
 
         const newSecret = await (await api.post('https://localhost:5001/api/secrets', newUserSecret)).data;
@@ -34,7 +36,7 @@ export default function MySecrets( { loggedInUser, userSecrets, setUserSecrets }
     }
 
     const getSecrets = async() => {
-        const secrets = await api.get(`https://localhost:5001/api/secrets?ownerId=${loggedInUser.id}`);
+        const secrets = await api.get(`https://localhost:5001/api/secrets?ownerId=${contextComponent?.loggedInUser?.id}`);
         setUserSecrets(secrets.data);
     }
 

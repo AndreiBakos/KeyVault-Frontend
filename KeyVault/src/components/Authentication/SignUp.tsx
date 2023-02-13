@@ -1,11 +1,15 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { api, Page } from '../../data/globalVariables';
 import { ValidateEmail } from '../../Utils/ValidateData';
 import showPassword  from '../../assets/show-password.svg';
 import hidePassword from '../../assets/hide-password.svg';
 import { SHA256 } from 'crypto-js';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { ContextComponent } from '../../Context';
 
-export default function SignUp( { setScreen, loggedInUser, setLoggedInUser  }: any ) {
+export default function SignUp() {
+    const navigate = useNavigate();
+    const contextComponent = useContext(ContextComponent);
     const [userName, setUserName] = useState<string>('');
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
@@ -49,8 +53,9 @@ export default function SignUp( { setScreen, loggedInUser, setLoggedInUser  }: a
                 return
             }
             const user = userResponse.data;
-            setLoggedInUser(user);
-            setScreen(Page.Home);
+            contextComponent?.setLoggedInUser(user);
+            localStorage.setItem('loggedInUser', JSON.stringify(user));
+            navigate('/home')
         } catch (error) {
             alert("User already exists");
         }
@@ -77,7 +82,7 @@ export default function SignUp( { setScreen, loggedInUser, setLoggedInUser  }: a
             </div>
             <div style={{ display: 'flex', color: 'black', alignSelf: 'center' }}>
             <p style={{ color: 'white' }}>Already have an account?</p>
-            <button className='log-in-button' onClick={() => setScreen(Page.LogIn)}>Log In</button>
+            <button className='log-in-button' onClick={() => navigate('/login')}>Log In</button>
             </div>
             <button className='submit-btn' onClick={handleSubmit}>Sign Up</button>
         </div>

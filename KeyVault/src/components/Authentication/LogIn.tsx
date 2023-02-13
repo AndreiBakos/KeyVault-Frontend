@@ -1,14 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { api, Page } from '../../data/globalVariables';
 import { ValidateEmail } from '../../Utils/ValidateData';
 import showPassword  from '../../assets/show-password.svg';
 import hidePassword from '../../assets/hide-password.svg';
 import { SHA256 } from 'crypto-js';
+import { ContextComponent } from '../../Context';
+import { useNavigate } from 'react-router-dom';
 
-export default function LogIn( { setScreen, loggedInUser, setLoggedInUser }: any ) {
+export default function LogIn() {
+    const contextComponent = useContext(ContextComponent);
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [ isHidden, setIsHidden ] = useState<boolean>(true);
+    const navigate = useNavigate();
 
     const handleSubmit = async() => {    
         if(email.length == 0 || password.length === 0) {
@@ -38,8 +42,9 @@ export default function LogIn( { setScreen, loggedInUser, setLoggedInUser }: any
             return
         }
         const user = userResponse.data;
-        setLoggedInUser(user);
-        setScreen(Page.Home);
+        localStorage.setItem('loggedInUser', JSON.stringify(user));
+        contextComponent?.setLoggedInUser(user);
+        navigate('/home')
     }
 
     return (
@@ -59,7 +64,7 @@ export default function LogIn( { setScreen, loggedInUser, setLoggedInUser }: any
                 </div>
                 <div style={{ display: 'flex', color: 'black', alignSelf: 'center' }}>
                     <p style={{ color: '#ffffffee' }}>Don't have an account?</p>
-                    <button className='sign-up-button' onClick={() => setScreen(Page.SignUp)}>Sign Up</button>
+                    <button className='sign-up-button' onClick={() => navigate('/signup')}>Sign Up</button>
                 </div>
                 <button className='submit-btn' type='submit' onClick={handleSubmit}>Login</button>
             </div>
