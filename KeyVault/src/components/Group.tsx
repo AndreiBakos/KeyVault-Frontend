@@ -1,6 +1,8 @@
-import { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { GroupSecretsData, GroupSecretsDataForCreation, Secret, UserForHome, UserForHomeSearch } from '../data/UserSecrets';
 import { api } from '../data/globalVariables';
+import { ContextComponent } from '../Context';
+import { useNavigate, useParams } from 'react-router-dom';
 import createSign from '../assets/create-sign.svg';
 import closeCreate from '../assets/close-create.svg';
 import backToGroups from '../assets/back-to-groups.svg';
@@ -8,22 +10,14 @@ import searchUser from '../assets/search-logo.svg';
 import NewMemberScreen from './GroupComponents/NewMemberScreen';
 import NewSecretsScreen from './GroupComponents/NewSecretsScreen';
 import Secrets from './GroupComponents/Secrets';
-import '../Home.css'
 import GroupMembers from './GroupComponents/GroupMembers';
-import { ContextComponent } from '../Context';
+import '../Home.css'
 
-interface GroupProps {
-    currentGroup: GroupSecretsData,
-    setCurrentGroup: Dispatch<SetStateAction<GroupSecretsData>>, 
-    groupsList: GroupSecretsData[],
-    setGroupsList: Dispatch<SetStateAction<GroupSecretsData[]>>,
-    isGroupEntered: SetStateAction<boolean>,
-    setIsGroupEntered: Dispatch<SetStateAction<boolean>>,
-}
-
-
-export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsList, isGroupEntered, setIsGroupEntered }: GroupProps ) {
+export default function() {
     const contextComponent = useContext(ContextComponent);
+    const navigate = useNavigate();
+    const { id } = useParams();
+    const [ currentGroup, setCurrentGroup ] = useState<GroupSecretsData>();
     const [ isNewSecretTriggered, setIsNewSecretTriggered ] = useState<boolean>(false);
     const [ newSecretTitle, setNewSecretTitle ] = useState<string>('');
     const [ newSecretContent, setNewSecretContent ] = useState<string>('');
@@ -76,22 +70,41 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
     }
 
     const getGroupMembers = async() => {
+        console.log(currentGroup);
         setNewMembersPageTrigger(!newMembersPageTrigger);
-        const response = await api.get(`https://localhost:5001/api/groups/members?groupId=${currentGroup.groupId}`);
+        const response = await api.get(`https://localhost:5001/api/groups/members?groupId=${id}`);
 
         const newMembers: UserForHomeSearch[] = response.data.map((member: UserForHome) => {return {...member, checked: true}});        
 
         setGroupMembers(newMembers);
     }
 
+    const getCurrentGroup = async() => {
+        const user = localStorage.getItem('loggedInUser');
+        if(user !== null) {
+            const data = JSON.parse(user);
+            contextComponent?.setLoggedInUser(data);
+            try {
+                const request = await api.get(`https://localhost:5001/api/groups/${id}`);                        
+                const group: GroupSecretsData = request.data;
+                setCurrentGroup(group);
+            } catch (error) {
+                alert('Something went wrong');
+                navigate('/groups')
+            }
+        } else{
+            navigate('/');
+        }
+    }
+
     const getGroupSecrets = async() => {
-        const secrets:Secret[] = await (await api.get(`https://localhost:5001/api/groups/secrets?groupId=${currentGroup.groupId}`)).data;
+        const secrets:Secret[] = await (await api.get(`https://localhost:5001/api/groups/secrets?groupId=${id}`)).data;
         setGroupSecrets(secrets);
     }
 
     const createSecret = async () => {        
         const newGroupSecret: GroupSecretsDataForCreation = {
-            groupId: currentGroup.groupId,
+            groupId: `${id}`,
             secret: {
                 title: newSecretTitle,
                 content: newSecretContent,
@@ -107,11 +120,14 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
     }
 
     const removeGroup = async() => {
-        await api.delete(`https://localhost:5001/api/groups?groupId=${currentGroup.groupId}`);
+        const response = await api.delete(`https://localhost:5001/api/groups?groupId=${id}`);
 
-        const newGroupsList = groupsList.filter((group: GroupSecretsData) => group.groupId !== currentGroup.groupId);
-        setGroupsList(newGroupsList);
-        setIsGroupEntered(!isGroupEntered)
+        if(response.status > 400){
+            alert('something went wrong');
+            return;
+        }
+
+        navigate('/groups')
     }
 
     const removeSecret = async(secretId: string) => {
@@ -124,12 +140,12 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
     const removeMembers = async() => { 
         await api.delete(`https://localhost:5001/api/groups/members?ids=${selectedMembers}`);
 
-        const newMembersList = currentGroup.members.filter((member) => selectedMembers.indexOf(member.id) === -1)
+        const newMembersList = currentGroup?.members.filter((member) => selectedMembers.indexOf(member.id) === -1)
         setCurrentGroup({
-            groupId: currentGroup.groupId,
-            title: currentGroup.title,            
-            members: newMembersList,
-            ownerId: currentGroup.ownerId
+            groupId: `${id}`,
+            title: `${currentGroup?.title}`,
+            members: newMembersList || [],
+            ownerId: `${currentGroup?.ownerId}`
         })
         setNewMembersPageTrigger(!newMembersPageTrigger);
     }
@@ -138,7 +154,7 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
         const response = await api.get(`https://localhost:5001/api/users?userName=${newUserName}`);
         
         const users: UserForHome[] = response.data;
-        const filteredUsers = users.filter((user) => currentGroup.members.filter((groupMember: UserForHome) => groupMember.id === user.id).length === 0 && user.userName !== currentGroup.ownerId);
+        const filteredUsers = users.filter((user) => currentGroup?.members.filter((groupMember: UserForHome) => groupMember.id === user.id).length === 0 && user.userName !== currentGroup.ownerId);
 
         if(filteredUsers.length === 0){
             setNoUserFoundErrorTrigger('No users found');
@@ -193,17 +209,17 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
         
         for(var i = 0; i < selectedUsersList.length; i++){
             formatedSelectedUsersList.push({
-                groupId: currentGroup.groupId,
+                groupId: `${id}`,
                 memberId: selectedUsersList[i].id
             })
         }
         if(formatedSelectedUsersList.length !== 0){
             const response = await api.post('https://localhost:5001/api/groups/members', formatedSelectedUsersList);
             setCurrentGroup({
-                groupId: currentGroup.groupId,
-                title: currentGroup.title,            
+                groupId: `${id}`,
+                title: `${currentGroup?.title}`,            
                 members: response.data,
-                ownerId: currentGroup.ownerId
+                ownerId: `${currentGroup?.ownerId}`
             })
             
             setSelectedUsersList([]);
@@ -212,22 +228,27 @@ export default function( { currentGroup, setCurrentGroup, groupsList, setGroupsL
             setIsNewMemberTriggered(!isNewMemberTriggered)
         }
     }
+    useEffect(() => {
+        getCurrentGroup();
+    },[])
 
     useEffect(() => {
-        getGroupSecrets()
-    },[])
+        if(currentGroup){
+            getGroupSecrets();
+        }
+    },[currentGroup])
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', marginTop: 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <img className='enter-group-secret' style={{ width: 40, height: 40 }} src={backToGroups} onClick={() => setIsGroupEntered(!isGroupEntered)} />
-                        <p style={{ fontWeight: 'bolder', fontSize: 30, marginLeft: 20, paddingTop: 3 }}>{currentGroup.title}</p>
+                        <img className='enter-group-secret' style={{ width: 40, height: 40 }} src={backToGroups} onClick={() => navigate('/groups')} />
+                        <p style={{ fontWeight: 'bolder', fontSize: 30, marginLeft: 20, paddingTop: 3 }}>{currentGroup?.title}</p>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '60%'}}>
                         <button className='manage-members-btn' type='submit' onClick={() => getGroupMembers()}>Manage Members</button>
                         {
-                            currentGroup.ownerId === contextComponent?.loggedInUser?.id &&
+                            currentGroup?.ownerId === contextComponent?.loggedInUser?.id &&
                             <button className='delete-group-btn' type='submit' onClick={() => removeGroup()}>Delete Group</button>
                         }
                     </div>

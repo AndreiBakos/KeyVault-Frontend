@@ -10,14 +10,6 @@ export default function Header({ currentPage }: any) {
     const [ isSettingsMenu , setIsSettingsMenu ] = useState<boolean>(false);
     const navigate = useNavigate();
 
-    const setCurentSecretsPage = async (page: number) => {
-        if(page === SecretsPage.MySecrets) {
-            navigate('/groups')
-        } else {
-            navigate('/home')
-        }
-    }
-
     const Logout = () => {
         contextComponent?.setLoggedInUser(null);
         localStorage.removeItem('token');
