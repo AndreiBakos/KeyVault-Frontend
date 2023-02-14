@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { api, Page } from '../../data/globalVariables';
 import { ValidateEmail } from '../../Utils/ValidateData';
 import showPassword  from '../../assets/show-password.svg';
@@ -14,6 +14,13 @@ export default function SignUp() {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [ isHidden, setIsHidden ] = useState<boolean>(true);
+
+    const CheckIfLoggedIn = () => {
+        const loggedUser = localStorage.getItem('loggedInUser');
+        if(loggedUser !== null) {
+            navigate('/');
+        }
+    }
 
     const handleSubmit = async() => {
         if(email.length == 0 || password.length === 0 || userName .length === 0) {
@@ -60,6 +67,10 @@ export default function SignUp() {
             alert("User already exists");
         }
     }
+
+    useEffect(() => {
+        CheckIfLoggedIn();
+    },[])
 
     return (
         <div className="App" style={{ display: 'grid', placeItems: 'center', height: screen.height / 1.6}}>

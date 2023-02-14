@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { api } from '../data/globalVariables';
-import {  Secret, SecretForCreation } from '../data/UserSecrets';
+import {  Secret, SecretForCreation, UserForHome } from '../data/UserSecrets';
 import createSign from '../assets/create-sign.svg';
 import closeCreate from '../assets/close-create.svg';
 import deleteBtn from '../assets/delete-icon.svg';
@@ -36,8 +36,12 @@ export default function MySecrets( { userSecrets, setUserSecrets }: any ) {
     }
 
     const getSecrets = async() => {
-        const secrets = await api.get(`https://localhost:5001/api/secrets?ownerId=${contextComponent?.loggedInUser?.id}`);
-        setUserSecrets(secrets.data);
+        const user = localStorage.getItem('loggedInUser');
+        if(user !== null) {
+            const data: UserForHome = JSON.parse(user)
+            const secrets = await api.get(`https://localhost:5001/api/secrets?ownerId=${data.id}`);
+            setUserSecrets(secrets.data);
+        }
     }
 
     useEffect(() => {        

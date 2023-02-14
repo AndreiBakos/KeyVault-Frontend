@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { api } from '../data/globalVariables';
+import { api, SecretsPage } from '../data/globalVariables';
 import { emptyGroup, GroupSecretsData, UserForHome } from '../data/UserSecrets';
 import createSign from '../assets/create-sign.svg';
 import closeCreate from '../assets/close-create.svg';
@@ -8,13 +8,15 @@ import SubmitGroupName from '../assets/check-logo.svg';
 import '../Home.css'
 import Group from './Group';
 import { ContextComponent } from '../Context';
+import Header from './Header';
 
-export default function GroupSecrets( { loggedInUser, groupsList, setGroupsList }: any ) {
+export default function GroupSecrets() {
     const contextComponent = useContext(ContextComponent);
     const [ isNewSecretTriggered, setIsNewSecretTriggered ] = useState<boolean>(false);
     const [ isGroupEntered, setIsGroupEntered ] = useState<boolean>(false);
     const [ currentGroup, setCurrentGroup ] = useState<GroupSecretsData>(emptyGroup);
     const [ newGroupTitle, setNewGroupTitle ] = useState<string>('');
+    const [ groupsList, setGroupsList ] = useState<GroupSecretsData[]>([]);
 
     const handleScreenChange = ( group: GroupSecretsData ) => {
         setCurrentGroup(group);
@@ -35,8 +37,12 @@ export default function GroupSecrets( { loggedInUser, groupsList, setGroupsList 
     }
     
     const getGroups = async() => {
-        const groups = await api.get(`https://localhost:5001/api/groups?userId=${contextComponent?.loggedInUser?.id}`);
-        setGroupsList(groups.data);        
+        const user = localStorage.getItem('loggedInUser');
+        if(user !== null) {
+            const data: UserForHome = JSON.parse(user)
+            const groups = await api.get(`https://localhost:5001/api/groups?userId=${data.id}`);
+            setGroupsList(groups.data);
+        }
     }
 
     useEffect(() => {
@@ -50,6 +56,7 @@ export default function GroupSecrets( { loggedInUser, groupsList, setGroupsList 
     }else{
         return (
             <div>
+                <Header currentPage={SecretsPage.GroupSecrets} />
                 <div style={{ justifyContent: !isNewSecretTriggered ? 'flex-end' : 'space-between' }} className='create-secret-conatiner'>
                     <label hidden={!isNewSecretTriggered} >Enter Group Name</label>
                     <div style={{ display: 'flex', width: '80%', justifyContent: 'center' }}>

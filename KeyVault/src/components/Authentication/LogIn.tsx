@@ -14,6 +14,13 @@ export default function LogIn() {
     const [ isHidden, setIsHidden ] = useState<boolean>(true);
     const navigate = useNavigate();
 
+    const CheckIfLoggedIn = () => {
+        const loggedUser = localStorage.getItem('loggedInUser');
+        if(loggedUser !== null) {
+            navigate('/');
+        }
+    }
+
     const handleSubmit = async() => {    
         if(email.length == 0 || password.length === 0) {
             alert('Please fill in all fields!')
@@ -46,6 +53,10 @@ export default function LogIn() {
         contextComponent?.setLoggedInUser(user);
         navigate('/home')
     }
+
+    useEffect(() => {
+        CheckIfLoggedIn();
+    }, [])
 
     return (
         <div className="App" style={{ display: 'grid', placeItems: 'center', height: screen.height / 1.6}}>

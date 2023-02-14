@@ -6,6 +6,7 @@ import LogIn from './components/Authentication/LogIn';
 import Home from './components/Home';
 import { ContextComponentProvider } from './Context';
 import SignUp from './components/Authentication/SignUp';
+import GroupSecrets from './components/GroupSecrets';
 
 const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
   {
     path: '/signup',
     element: <SignUp />
+  },
+  {
+    path: '/groups',
+    element: <GroupSecrets />
   }
 ])
 
