@@ -6,6 +6,7 @@ import hidePassword from '../../assets/hide-password.svg';
 import { SHA256 } from 'crypto-js';
 import { ContextComponent } from '../../Context';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function LogIn() {
     const contextComponent = useContext(ContextComponent);
@@ -43,7 +44,12 @@ export default function LogIn() {
         localStorage.setItem('token', token);
 
         const hashedPassword = SHA256(password).toString();
-        const userResponse = await api.get(`https://localhost:5001/api/users/login?email=${email}&password=${hashedPassword}`);
+        const userResponse = await axios.get(`https://localhost:5001/api/users/login?email=${email}&password=${hashedPassword}`,
+        {
+            headers: {
+            'Authorization': `Bearer ${token}`
+            }
+        });
         if(userResponse.status === 204){
             alert('Invalid credentials');
             return

@@ -70,13 +70,23 @@ export default function() {
     }
 
     const getGroupMembers = async() => {
-        console.log(currentGroup);
-        setNewMembersPageTrigger(!newMembersPageTrigger);
-        const response = await api.get(`https://localhost:5001/api/groups/members?groupId=${id}`);
-
-        const newMembers: UserForHomeSearch[] = response.data.map((member: UserForHome) => {return {...member, checked: true}});        
-
-        setGroupMembers(newMembers);
+        try {            
+            setNewMembersPageTrigger(!newMembersPageTrigger);
+            const response = await api.get(`https://localhost:5001/api/groups/members?groupId=${id}`);
+    
+            const newMembers: UserForHomeSearch[] = response.data.map((member: UserForHome) => {return {...member, checked: true}});        
+    
+            setGroupMembers(newMembers);
+        } catch (error: any) {
+            if(error.response.status === 401) {
+                alert('Your session has expired! Log in again to continue');
+            } else {
+                alert('Something went wrong! Try to log in again');
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('loggedInUser');
+            navigate('/')
+        }
     }
 
     const isUserInGroup = (currentUserId: string, group: GroupSecretsData): boolean => {
@@ -90,92 +100,173 @@ export default function() {
     }
 
     const getCurrentGroup = async() => {
-        const user = localStorage.getItem('loggedInUser');
-        if(user !== null) {
-            try {
-                const data = JSON.parse(user);
-                contextComponent?.setLoggedInUser(data);
-                const request = await api.get(`https://localhost:5001/api/groups/${id}`);
-                const group: GroupSecretsData = request.data;
-                if(!isUserInGroup(data.id, group)){
-                    throw new Error("User not in group");
+        try {            
+            const user = localStorage.getItem('loggedInUser');
+            if(user !== null) {
+                try {
+                    const data = JSON.parse(user);
+                    contextComponent?.setLoggedInUser(data);
+                    const request = await api.get(`https://localhost:5001/api/groups/${id}`);
+                    const group: GroupSecretsData = request.data;
+                    if(!isUserInGroup(data.id, group)){
+                        throw new Error("User not in group");
+                    }
+                    setCurrentGroup(group);
+                } catch (error: any) {
+                    if(error.response.status === 401) {
+                        alert('Your session has expired! Log in again to continue!');
+                    } else {
+                        alert("Something went wrong!");
+                    }
+                    navigate('/groups');
                 }
-                setCurrentGroup(group);
-            } catch (error) {
-                alert(error);
-                navigate('/groups')
+            } else{
+                navigate('/');
             }
-        } else{
-            navigate('/');
+        } catch (error: any) {
+            if(error.response.status === 401) {
+                alert('Your session has expired! Log in again to continue');
+            } else {
+                alert('Something went wrong! Try to log in again');
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('loggedInUser');
+            navigate('/')
         }
     }
 
     const getGroupSecrets = async() => {
-        const secrets:Secret[] = await (await api.get(`https://localhost:5001/api/groups/secrets?groupId=${id}`)).data;
-        setGroupSecrets(secrets);
+        try {            
+            const secrets:Secret[] = await (await api.get(`https://localhost:5001/api/groups/secrets?groupId=${id}`)).data;
+            setGroupSecrets(secrets);
+        } catch (error: any) {
+            if(error.response.status === 401) {
+                alert('Your session has expired! Log in again to continue');
+            } else {
+                alert('Something went wrong! Try to log in again');
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('loggedInUser');
+            navigate('/')
+        }
     }
 
     const createSecret = async () => {        
-        const newGroupSecret: GroupSecretsDataForCreation = {
-            groupId: `${id}`,
-            secret: {
-                title: newSecretTitle,
-                content: newSecretContent,
-                ownerId: `${contextComponent?.loggedInUser?.id}`
+        try {            
+            const newGroupSecret: GroupSecretsDataForCreation = {
+                groupId: `${id}`,
+                secret: {
+                    title: newSecretTitle,
+                    content: newSecretContent,
+                    ownerId: `${contextComponent?.loggedInUser?.id}`
+                }
             }
+            
+            const response: Secret = await (await api.post('https://localhost:5001/api/groups/secrets', newGroupSecret)).data
+            setGroupSecrets((groupSecrets) => [...groupSecrets, response]);
+            setNewSecretTitle('');
+            setNewSecretContent('');
+            setIsNewSecretTriggered(!isNewSecretTriggered);
+        } catch (error: any) {
+            if(error.response.status === 401) {
+                alert('Your session has expired! Log in again to continue');
+            } else {
+                alert('Something went wrong! Try to log in again');
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('loggedInUser');
+            navigate('/')
         }
-        
-        const response: Secret = await (await api.post('https://localhost:5001/api/groups/secrets', newGroupSecret)).data
-        setGroupSecrets((groupSecrets) => [...groupSecrets, response]);
-        setNewSecretTitle('');
-        setNewSecretContent('');
-        setIsNewSecretTriggered(!isNewSecretTriggered);
     }
 
     const removeGroup = async() => {
-        const response = await api.delete(`https://localhost:5001/api/groups?groupId=${id}`);
-
-        if(response.status > 400){
-            alert('something went wrong');
-            return;
+        try {
+            const response = await api.delete(`https://localhost:5001/api/groups?groupId=${id}`);
+    
+            if(response.status > 400){
+                alert('something went wrong');
+                return;
+            }
+    
+            navigate('/groups')
+        } catch (error: any) {
+            if(error.response.status === 401) {
+                alert('Your session has expired! Log in again to continue');
+            } else {
+                alert('Something went wrong! Try to log in again');
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('loggedInUser');
+            navigate('/')
         }
-
-        navigate('/groups')
     }
 
     const removeSecret = async(secretId: string) => {
-        await api.delete(`https://localhost:5001/api/groups/secrets?secretId=${secretId}`);
-
-        const newGroupSecrets = groupSecrets.filter((groupSecrets: Secret) => groupSecrets.secretId !== secretId);
-        setGroupSecrets(newGroupSecrets);
+        try {
+            await api.delete(`https://localhost:5001/api/groups/secrets?secretId=${secretId}`);
+    
+            const newGroupSecrets = groupSecrets.filter((groupSecrets: Secret) => groupSecrets.secretId !== secretId);
+            setGroupSecrets(newGroupSecrets);            
+        } catch (error: any) {
+            if(error.response.status === 401) {
+                alert('Your session has expired! Log in again to continue');
+            } else {
+                alert('Something went wrong! Try to log in again');
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('loggedInUser');
+            navigate('/')
+        }
     }
 
     const removeMembers = async() => { 
-        await api.delete(`https://localhost:5001/api/groups/members?ids=${selectedMembers}`);
-
-        const newMembersList = currentGroup?.members.filter((member) => selectedMembers.indexOf(member.id) === -1)
-        setCurrentGroup({
-            groupId: `${id}`,
-            title: `${currentGroup?.title}`,
-            members: newMembersList || [],
-            ownerId: `${currentGroup?.ownerId}`
-        })
-        setNewMembersPageTrigger(!newMembersPageTrigger);
+        try {        
+            await api.delete(`https://localhost:5001/api/groups/members?ids=${selectedMembers}`);
+    
+            const newMembersList = currentGroup?.members.filter((member) => selectedMembers.indexOf(member.id) === -1)
+            setCurrentGroup({
+                groupId: `${id}`,
+                title: `${currentGroup?.title}`,
+                members: newMembersList || [],
+                ownerId: `${currentGroup?.ownerId}`
+            })
+            setNewMembersPageTrigger(!newMembersPageTrigger);
+        } catch (error: any) {
+            if(error.response.status === 401) {
+                alert('Your session has expired! Log in again to continue');
+            } else {
+                alert('Something went wrong! Try to log in again');
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('loggedInUser');
+            navigate('/')
+        }
     }
 
     const checkForUsers = async() => {
-        const response = await api.get(`https://localhost:5001/api/users?userName=${newUserName}`);
-        
-        const users: UserForHome[] = response.data;
-        const filteredUsers = users.filter((user) => currentGroup?.members.filter((groupMember: UserForHome) => groupMember.id === user.id).length === 0 && user.userName !== currentGroup.ownerId);
-
-        if(filteredUsers.length === 0){
-            setNoUserFoundErrorTrigger('No users found');
-            return;
+        try {
+            const response = await api.get(`https://localhost:5001/api/users?userName=${newUserName}`);
+            
+            const users: UserForHome[] = response.data;
+            const filteredUsers = users.filter((user) => currentGroup?.members.filter((groupMember: UserForHome) => groupMember.id === user.id).length === 0 && user.userName !== currentGroup.ownerId);
+    
+            if(filteredUsers.length === 0){
+                setNoUserFoundErrorTrigger('No users found');
+                return;
+            }
+    
+            const newUsers: UserForHomeSearch[] = filteredUsers.map((user: UserForHome) => {return {...user, checked: false}});        
+            setFoundUsers(newUsers);            
+        } catch (error: any) {
+            if(error.response.status === 401) {
+                alert('Your session has expired! Log in again to continue');
+            } else {
+                alert('Something went wrong! Try to log in again');
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('loggedInUser');
+            navigate('/')
         }
-
-        const newUsers: UserForHomeSearch[] = filteredUsers.map((user: UserForHome) => {return {...user, checked: false}});        
-        setFoundUsers(newUsers);
     }
     const handleCheckBoxForMembers = ( member: UserForHomeSearch ) => {   
         const newFoundMemberList = groupMembers.map((memberParam: UserForHomeSearch) => {
@@ -218,27 +309,38 @@ export default function() {
     }
 
     const addUsersToGroup = async() => {
-        const formatedSelectedUsersList: {groupId: string, memberId: string}[] = [];
-        
-        for(var i = 0; i < selectedUsersList.length; i++){
-            formatedSelectedUsersList.push({
-                groupId: `${id}`,
-                memberId: selectedUsersList[i].id
-            })
-        }
-        if(formatedSelectedUsersList.length !== 0){
-            const response = await api.post('https://localhost:5001/api/groups/members', formatedSelectedUsersList);
-            setCurrentGroup({
-                groupId: `${id}`,
-                title: `${currentGroup?.title}`,            
-                members: response.data,
-                ownerId: `${currentGroup?.ownerId}`
-            })
+        try {        
+            const formatedSelectedUsersList: {groupId: string, memberId: string}[] = [];
             
-            setSelectedUsersList([]);
-            setFoundUsers([]);
-            setNewUserName('');
-            setIsNewMemberTriggered(!isNewMemberTriggered)
+            for(var i = 0; i < selectedUsersList.length; i++){
+                formatedSelectedUsersList.push({
+                    groupId: `${id}`,
+                    memberId: selectedUsersList[i].id
+                })
+            }
+            if(formatedSelectedUsersList.length !== 0){
+                const response = await api.post('https://localhost:5001/api/groups/members', formatedSelectedUsersList);
+                setCurrentGroup({
+                    groupId: `${id}`,
+                    title: `${currentGroup?.title}`,            
+                    members: response.data,
+                    ownerId: `${currentGroup?.ownerId}`
+                })
+                
+                setSelectedUsersList([]);
+                setFoundUsers([]);
+                setNewUserName('');
+                setIsNewMemberTriggered(!isNewMemberTriggered)
+            }
+        } catch (error: any) {
+            if(error.response.status === 401) {
+                alert('Your session has expired! Log in again to continue');
+            } else {
+                alert('Something went wrong! Try to log in again');
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('loggedInUser');
+            navigate('/')
         }
     }
     useEffect(() => {

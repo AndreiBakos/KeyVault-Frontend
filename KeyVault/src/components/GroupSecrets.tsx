@@ -20,27 +20,48 @@ export default function GroupSecrets() {
     const [ groupsList, setGroupsList ] = useState<GroupSecretsData[]>([]);
 
     const createNewGroup = async() => {
-        const response = await api.post('https://localhost:5001/api/groups', {
-            title: newGroupTitle,
-            ownerId: contextComponent?.loggedInUser?.id
-        })
-
-        const newGroup: GroupSecretsData = response.data;
-        setGroupsList((groups: GroupSecretsData[]) => [newGroup, ...groups]);
-        setNewGroupTitle('');
-        setIsNewSecretTriggered(!isNewSecretTriggered);
-        
+        try {        
+            const response = await api.post('https://localhost:5001/api/groups', {
+                title: newGroupTitle,
+                ownerId: contextComponent?.loggedInUser?.id
+            })
+    
+            const newGroup: GroupSecretsData = response.data;
+            setGroupsList((groups: GroupSecretsData[]) => [newGroup, ...groups]);
+            setNewGroupTitle('');
+            setIsNewSecretTriggered(!isNewSecretTriggered);
+        } catch (error: any) {
+            if(error.response.status === 401) {
+                alert('Your session has expired! Log in again to continue');
+            } else {
+                alert('Something went wrong! Try to log in again');
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('loggedInUser');
+            navigate('/')
+        }        
     }
     
     const getGroups = async() => {
-        const user = localStorage.getItem('loggedInUser');
-        if(user !== null) {
-            const data: UserForHome = JSON.parse(user);
-            contextComponent?.setLoggedInUser(data);
-            const groups = await api.get(`https://localhost:5001/api/groups?userId=${data.id}`);
-            setGroupsList(groups.data);
-        }else{
-            navigate('/');
+        try {
+            const user = localStorage.getItem('loggedInUser');
+            if(user !== null) {
+                const data: UserForHome = JSON.parse(user);
+                contextComponent?.setLoggedInUser(data);
+                const groups = await api.get(`https://localhost:5001/api/groups?userId=${data.id}`);
+                setGroupsList(groups.data);
+            }else{
+                navigate('/');
+            }            
+        } catch (error: any) {
+            if(error.response.status === 401) {
+                alert('Your session has expired! Log in again to continue');
+            } else {
+                alert('Something went wrong! Try to log in again');
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('loggedInUser');
+            navigate('/')
         }
     }
 

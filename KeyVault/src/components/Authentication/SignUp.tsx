@@ -6,6 +6,7 @@ import hidePassword from '../../assets/hide-password.svg';
 import { SHA256 } from 'crypto-js';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { ContextComponent } from '../../Context';
+import axios from 'axios';
 
 export default function SignUp() {
     const navigate = useNavigate();
@@ -54,7 +55,11 @@ export default function SignUp() {
 
         localStorage.setItem('token', token);
         try {
-            const userResponse = await api.post(`https://localhost:5001/api/users/create`, newUser);
+            const userResponse = await axios.post(`https://localhost:5001/api/users/create`, newUser, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                  }
+            });
             if(userResponse.status === 204){
                 alert('Invalid credentials');
                 return
@@ -63,8 +68,12 @@ export default function SignUp() {
             contextComponent?.setLoggedInUser(user);
             localStorage.setItem('loggedInUser', JSON.stringify(user));
             navigate('/home')
-        } catch (error) {
-            alert("User already exists");
+        } catch (error: any) {
+            if(error.response.status < 500) {
+                alert("User already exists!");
+            } else {
+                alert('Something went wrong!');
+            }
         }
     }
 

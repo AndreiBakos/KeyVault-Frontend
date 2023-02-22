@@ -6,41 +6,75 @@ import closeCreate from '../assets/close-create.svg';
 import deleteBtn from '../assets/delete-icon.svg';
 import '../Home.css'
 import { ContextComponent } from '../Context';
+import { useNavigate } from 'react-router-dom';
 
 export default function MySecrets( { userSecrets, setUserSecrets }: any ) {
+    const navigate = useNavigate();
     const contextComponent = useContext(ContextComponent);
     const [ isNewSecretTriggered, setIsNewSecretTriggered ] = useState<boolean>(false);
     const [ newSecretTitle, setNewSecretTitle ] = useState<string>('');
     const [ newSecretDescription, setNewSecretContent ] = useState<string>('');
 
     const createSecret = async() => {        
-        //make Api call here
+        try {        
+            const newUserSecret: SecretForCreation = {
+                title: newSecretTitle,
+                content: newSecretDescription,
+                ownerId: `${contextComponent?.loggedInUser?.id}`
+                
+            }
 
-        const newUserSecret: SecretForCreation = {
-            title: newSecretTitle,
-            content: newSecretDescription,
-            ownerId: `${contextComponent?.loggedInUser?.id}`
+            const newSecret = await (await api.post('https://localhost:5001/api/secrets', newUserSecret)).data;
+            setUserSecrets((secrets: Secret[]) => [...secrets, newSecret]);
+            setNewSecretTitle('');
+            setNewSecretContent('');
+            setIsNewSecretTriggered(!isNewSecretTriggered);
+        } catch (error: any) {
+            if(error.response.status === 401) {
+                alert('Your session has expired! Log in again to continue');
+            } else {
+                alert('Something went wrong! Try to log in again');
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('loggedInUser');
+            navigate('/')
         }
-
-        const newSecret = await (await api.post('https://localhost:5001/api/secrets', newUserSecret)).data;
-        setUserSecrets((secrets: Secret[]) => [...secrets, newSecret]);
-        setNewSecretTitle('');
-        setNewSecretContent('');
-        setIsNewSecretTriggered(!isNewSecretTriggered);
     }
 
     const removeSecret = async (secretId: string) => {
-        const newSecretsList = userSecrets.filter((secret: Secret) => secret.secretId !== secretId);
-        const request = await api.delete(`https://localhost:5001/api/secrets?secretId=${secretId}`);
-        setUserSecrets(newSecretsList);
+        try {    
+            const newSecretsList = userSecrets.filter((secret: Secret) => secret.secretId !== secretId);
+            const request = await api.delete(`https://localhost:5001/api/secrets?secretId=${secretId}`);
+            setUserSecrets(newSecretsList);
+        } catch (error: any) {
+            if(error.response.status === 401) {
+                alert('Your session has expired! Log in again to continue');
+            } else {
+                alert('Something went wrong! Try to log in again');
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('loggedInUser');
+            navigate('/')
+        }
     }
 
     const getSecrets = async() => {
-        const user = localStorage.getItem('loggedInUser');
-        if(user !== null) {
-            const data: UserForHome = JSON.parse(user)
-            const secrets = await api.get(`https://localhost:5001/api/secrets?ownerId=${data.id}`);
-            setUserSecrets(secrets.data);
+        try {
+            const user = localStorage.getItem('loggedInUser');
+            if(user !== null) {
+                const data: UserForHome = JSON.parse(user)
+                const secrets = await api.get(`https://localhost:5001/api/secrets?ownerId=${data.id}`);            
+                setUserSecrets(secrets.data);
+            }
+        } catch (error: any) {
+            if(error.response.status === 401) {
+                alert('Your session has expired! Log in again to continue');
+            } else {
+                alert('Something went wrong! Try to log in again');
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('loggedInUser');
+            navigate('/')
         }
     }
 
