@@ -1,13 +1,12 @@
 import { Secret } from "../../data/UserSecrets";
 import deleteBtn from '../../assets/delete-icon.svg';
 
-
 export default function Secrets ({ groupSecrets, removeSecret }: any){
     return(
         <>
             {
-                groupSecrets.map((secret: Secret) => (
-                    <div className='secrets-content' key={secret.secretId}>
+                groupSecrets.map((secret: Secret, index: number) => (
+                    <div className='secrets-content' key={secret.secretId + index}>
                         <p className='secrets-values'>{secret.title}</p>
                         <p className='secrets-values'>{secret.content}</p>
                         <p className='secrets-values'>{secret.dateCreated}</p>

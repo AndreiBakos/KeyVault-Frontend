@@ -1,15 +1,27 @@
-import { useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { api, Page } from '../../data/globalVariables';
 import { ValidateEmail } from '../../Utils/ValidateData';
 import showPassword  from '../../assets/show-password.svg';
 import hidePassword from '../../assets/hide-password.svg';
 import { SHA256 } from 'crypto-js';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { ContextComponent } from '../../Context';
+import axios from 'axios';
 
-export default function SignUp( { setScreen, loggedInUser, setLoggedInUser  }: any ) {
+export default function SignUp() {
+    const navigate = useNavigate();
+    const contextComponent = useContext(ContextComponent);
     const [userName, setUserName] = useState<string>('');
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [ isHidden, setIsHidden ] = useState<boolean>(true);
+
+    const CheckIfLoggedIn = () => {
+        const loggedUser = localStorage.getItem('loggedInUser');
+        if(loggedUser !== null) {
+            navigate('/');
+        }
+    }
 
     const handleSubmit = async() => {
         if(email.length == 0 || password.length === 0 || userName .length === 0) {
@@ -43,18 +55,31 @@ export default function SignUp( { setScreen, loggedInUser, setLoggedInUser  }: a
 
         localStorage.setItem('token', token);
         try {
-            const userResponse = await api.post(`https://localhost:5001/api/users/create`, newUser);
+            const userResponse = await axios.post(`https://localhost:5001/api/users/create`, newUser, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                  }
+            });
             if(userResponse.status === 204){
                 alert('Invalid credentials');
                 return
             }
             const user = userResponse.data;
-            setLoggedInUser(user);
-            setScreen(Page.Home);
-        } catch (error) {
-            alert("User already exists");
+            contextComponent?.setLoggedInUser(user);
+            localStorage.setItem('loggedInUser', JSON.stringify(user));
+            navigate('/home')
+        } catch (error: any) {
+            if(error.response.status < 500) {
+                alert("User already exists!");
+            } else {
+                alert('Something went wrong!');
+            }
         }
     }
+
+    useEffect(() => {
+        CheckIfLoggedIn();
+    },[])
 
     return (
         <div className="App" style={{ display: 'grid', placeItems: 'center', height: screen.height / 1.6}}>
@@ -77,7 +102,7 @@ export default function SignUp( { setScreen, loggedInUser, setLoggedInUser  }: a
             </div>
             <div style={{ display: 'flex', color: 'black', alignSelf: 'center' }}>
             <p style={{ color: 'white' }}>Already have an account?</p>
-            <button className='log-in-button' onClick={() => setScreen(Page.LogIn)}>Log In</button>
+            <button className='log-in-button' onClick={() => navigate('/login')}>Log In</button>
             </div>
             <button className='submit-btn' onClick={handleSubmit}>Sign Up</button>
         </div>
