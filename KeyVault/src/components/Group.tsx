@@ -79,17 +79,30 @@ export default function() {
         setGroupMembers(newMembers);
     }
 
+    const isUserInGroup = (currentUserId: string, group: GroupSecretsData): boolean => {
+        
+        var isInGroup:UserForHome[] = group.members.filter(g => g.id === currentUserId);
+        if(isInGroup.length > 0){
+            return true;
+        }
+
+        return false;
+    }
+
     const getCurrentGroup = async() => {
         const user = localStorage.getItem('loggedInUser');
         if(user !== null) {
-            const data = JSON.parse(user);
-            contextComponent?.setLoggedInUser(data);
             try {
-                const request = await api.get(`https://localhost:5001/api/groups/${id}`);                        
+                const data = JSON.parse(user);
+                contextComponent?.setLoggedInUser(data);
+                const request = await api.get(`https://localhost:5001/api/groups/${id}`);
                 const group: GroupSecretsData = request.data;
+                if(!isUserInGroup(data.id, group)){
+                    throw new Error("User not in group");
+                }
                 setCurrentGroup(group);
             } catch (error) {
-                alert('Something went wrong');
+                alert(error);
                 navigate('/groups')
             }
         } else{
