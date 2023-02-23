@@ -28,3 +28,5 @@ When you want to run the app you will need to run: `npm run dev`
 
 
 That's it :)
+
+P.S: Check out the backend code as well (you need it): `https://github.com/AndreiBakos/KeyVault-Backend`
