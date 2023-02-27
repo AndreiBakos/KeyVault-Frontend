@@ -245,23 +245,33 @@ export default function() {
 
     const checkForUsers = async() => {
         try {
-            const response = await api.get(`https://localhost:5001/api/users?userName=${newUserName}`);
-            
-            const users: UserForHome[] = response.data;
-            const filteredUsers = users.filter((user) => currentGroup?.members.filter((groupMember: UserForHome) => groupMember.id === user.id).length === 0 && user.userName !== currentGroup.ownerId);
-    
-            if(filteredUsers.length === 0){
-                setNoUserFoundErrorTrigger('No users found');
-                return;
+            if(newUserName.length !== 0){
+
+                const response = await api.get(`https://localhost:5001/api/users?userName=${newUserName}`);
+                
+                if(response.data.length === 0){
+                    setFoundUsers([]);
+                    setNoUserFoundErrorTrigger('No users found');
+                    return;
+                }
+                const users: UserForHome[] = response.data;
+                const filteredUsers = users.filter((user) => currentGroup?.members.filter((groupMember: UserForHome) => groupMember.id === user.id).length === 0 && user.userName !== currentGroup.ownerId);
+        
+                if(filteredUsers.length === 0){
+                    setNoUserFoundErrorTrigger('No users found');
+                    return;
+                }
+        
+                const newUsers: UserForHomeSearch[] = filteredUsers.map((user: UserForHome) => {return {...user, checked: false}});        
+                setFoundUsers(newUsers);            
             }
-    
-            const newUsers: UserForHomeSearch[] = filteredUsers.map((user: UserForHome) => {return {...user, checked: false}});        
-            setFoundUsers(newUsers);            
         } catch (error: any) {
             if(error.response.status === 401) {
                 alert('Your session has expired! Log in again to continue');
             } else {
-                alert('Something went wrong! Try to log in again');
+                alert(error.response.data);
+                setFoundUsers([]);
+                return;
             }
             localStorage.removeItem('token');
             localStorage.removeItem('loggedInUser');
